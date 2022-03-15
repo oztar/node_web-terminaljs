@@ -4,7 +4,7 @@ create modules for your code:
  - restart nodejs 
  - control memory
 
-##autor notes
+## autor notes
 This version is the base code, it is totally improvable.
 The project has particulars: jquery.min inside the project.
 I keep working to make it more professional. I hope you like it.
@@ -62,18 +62,18 @@ I keep working to make it more professional. I hope you like it.
 
 ## Core comands
 
-   mem       : alias memory
-   memory    : info memory process using
-   save      : Send event save modules loaded [trues and falses]
-   restart   : Restart process nodejs
-   verbose   : Level indicated your verbose terminal [0,9]
-   help      : List all comands modules loaded
-   module    : <options>
-	load   : Load new module in path
-	unload : Unload module in path
-	reload : Unload and load module in path
-	show   : List all modules in memory
-	list   : List all modules Load and Unload in path
+   - mem       : alias memory
+   - memory    : info memory process using
+   - save      : Send event save modules loaded [trues and falses]
+   - restart   : Restart process nodejs
+   - verbose   : Level indicated your verbose terminal [0,9]
+   - help      : List all comands modules loaded
+   - module    : < options >
+	 * load   : Load new module in path
+	 * unload : Unload module in path
+	 * reload : Unload and load module in path
+	 * show   : List all modules in memory
+	 * list   : List all modules Load and Unload in path
 
 ## save
 
