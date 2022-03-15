@@ -4,14 +4,14 @@ create modules for your code:
  - restart nodejs 
  - control memory
 
-##autor notes
+## autor notes
 This version is the base code, it is totally improvable.
 The project has particulars: jquery.min inside the project.
 I keep working to make it more professional. I hope you like it.
 
 ## Install
 
-   npm install web-terminaljs ( no yet, using manual install)
+   npm install web-terminaljs 
 
 ## install manual 
   
@@ -58,22 +58,24 @@ I keep working to make it more professional. I hope you like it.
     proto    : [http|https]
     publicip : [localhost|127.0.0.1|yourdomain.com...]
     port     : [80|443|8080...]
-    path     : path by your modules or addons wtm
+    path     : path by your custom modules or addons wtm
+    verbose  : Level inital console
 
 ## Core comands
 
-   mem       : alias memory
-   memory    : info memory process using
-   save      : Send event save modules loaded [trues and falses]
-   restart   : Restart process nodejs
-   verbose   : Level indicated your verbose terminal [0,9]
-   help      : List all comands modules loaded
-   module    : <options>
-	load   : Load new module in path
-	unload : Unload module in path
-	reload : Unload and load module in path
-	show   : List all modules in memory
-	list   : List all modules Load and Unload in path
+   - mem       : alias memory
+   - memory    : info memory process using
+   - save      : Send event save modules loaded [trues and falses]
+   - restart   : Restart process nodejs
+   - verbose   : Level indicated your verbose terminal [0,9]
+   - help      : List all comands modules loaded
+   - echo      : Echo module
+   - module    : < options >
+	 * load   : Load new module in path
+	 * unload : Unload module in path
+	 * reload : Unload and load module in path
+	 * show   : List all modules in memory
+	 * list   : List all modules Load and Unload in path
 
 ## save
 
@@ -94,4 +96,36 @@ you need crear a event listen ee.on(save:config)
 	your code here
 	...
     });
+
+
+## module custom
+you can create new modules, you will can use wtm_default template to create custom
+
+- you cant install:
+
+ customNameModule.js in **options.path** default **/modules** folder
+ /modules/customNameModule.js
+
+- structure for new comannd: 
+
+		module.exports = {
+		command : {
+			'name' : {
+				description : 'description module',
+				usage : 'howto use command',
+				auto  : ['argument']
+			}
+		},
+		name : function()...
+		autoload : false
+		}
+
+ - structure for new module without command:
+
+   		module.exports = {
+			command : {},
+			load : function()...
+			unload : function()...
+			autoload : true
+		}
 

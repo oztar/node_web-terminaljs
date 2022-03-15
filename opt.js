@@ -1,13 +1,15 @@
 'use strict'
 
+const vars = ['proto','publicip','port','lngTimeout','verbose'];
 
 
 module.exports = function(options){
     const j = require('./').options;
     if( options === undefined){ return;}
-    j.proto = options.proto || j.proto;
-    j.publicip = options.publicip || j.publicip;
-    j.port = options.port || j.port;
-    j.lngTimeout = options.lngTimeout || j.lngTimeout;
+
+    for( let i in vars){
+	const name = vars[i];
+	j[name] = options[name] || j[name];
+    }
     return;
 };

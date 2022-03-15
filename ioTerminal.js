@@ -88,6 +88,6 @@ module.exports = function(io){
 	
 	j.ioc[socket.id] = socket;
     });
+    j.io = tio;
     return io;
-    //IOserver.listen(j.config.web.IOport);
 }

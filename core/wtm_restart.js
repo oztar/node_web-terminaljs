@@ -1,6 +1,8 @@
 'use strict'
 const ee = require('../').ee;
 const j  = require('../').options;
+const u  = require('../').u;
+
 const { spawn } = require('child_process');
 
 const name  = 'restart';
@@ -8,46 +10,69 @@ const errors = {
     UNDEFINED    : '%s internal error:'+"\r\n"+'%s'
 };
 
-const _funct = function(socketID){
+
+const restartCon = {
+    description : 'Restart nodejs program',
+    usage : 'restart now',
+    auto  : ['now']
+}
+const restart = function(socketID,args){
     try{
-	process.on("exit", function () {
-	    //  Resolve the `child_process` module, and `spawn` 
-	    //  a new process.
-	    //  The `child_process` module lets us
-	    //  access OS functionalities by running any bash command.`.
-	    spawn(
-		process.argv.shift(),
-		process.argv,
-		{
-		    cwd: process.cwd(),
-		    detached: true,
-		    stdio: "inherit"
-		}
-	    );    
-	});
-	ee.emit(socketID,'Restarting');
-	process.exit();
+	if( args[1] == 'now'){
+	    ee.emit(socketID,'Restarting');
+	    process.on("exit", function () {
+		spawn(
+		    process.argv.shift(),
+		    process.argv,
+		    {
+			cwd: process.cwd(),
+			detached: true,
+			stdio: "inherit"
+		    }
+		);    
+	    });
+	    process.exit();
+	}else{
+	    ee.emit(socketID,restartCon.usage);
+	}
     }catch(e){
-	ee.emit(socketID+'err',u(errors['UNDEFINED'],name,e));
+	ee.emit(socketID+'err',u(errors['UNDEFINED'],'restart',e));
     }
 }
 
-const load = (socketID)=>{
-    ee.on(name,_funct);
-    j.list_command[name]= name;
-    j.list_usage_command[name]  = 'restart - nodejs';
-    j.list_auto_command[name] = null;//not arguments
-    ee.emit('send_autocomplete',name,j.list_auto_command[name]);
+
+
+const poweroffCon = {
+    description : 'shutdown the program',
+    usage : 'poweroff now',
+    auto  : ['now']
 }
 
-const unload = (socketID)=>{
-    ee.off(name,_funct);
-    delete j.list_command[name];
-    delete j.list_usage_command[name];
-    ee.emit('del_autocomplete',name);
+const poweroff = function(socketID,args){ 
+    try{
+	if( args[1] == 'now'){
+	    ee.emit(socketID,'Power Off');
+	    process.exit();
+	}else{
+	    ee.emit(socketID,poweroffCon.usage);
+	}
+    }catch(e){
+	ee.emit(socketID+'err',u(errors['UNDEFINED'],'poweroff',e));
+    }
 }
+
+const load = function(socketID){}
+const unload = function(socketID){}
+
 
 module.exports = {
-load,
-unload
+    command : {
+	'restart' : restartCon,
+	'poweroff': poweroffCon
+    },
+    restart,
+    poweroff,
+    load,
+    unload,
+    autload : false
 }

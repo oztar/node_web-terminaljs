@@ -3,40 +3,35 @@ let ee = require('../').ee;
 let j  = require('../').options;
 let u  = require('../').u;//utils
 
-const name = 'verbose';
-let level = 0;
+let level = j.verbose;
 
 //list of error, usage with utils
 const errors = {
     NOT_FOUND    : 'Command not found',
-    USAGE        : 'Arguments error, using help OR help usage '+name,
+    USAGE        : 'Arguments error, using help OR help usage verbose',
     UNDEFINED    : '%s internal error:'+"\r\n"+'%s'
 };
 
-//emit terminal error
-//ee.emit(socketID+'err',u(errors['UNDEFINED'],'Module Unload',e));
-
-//emit print terminal
-//ee.emit(socketID,'Module\t'+name);
-const _verbose = (socketID,args)=>{
+const verbose = function(socketID,args){
     try{
 	if( args[1] === undefined){
-	    _level(socketID,0);
+	    ee.emit(socketID,'verbose level is '+level);
 	    return;
 	}
 	if( parseInt(args[1])){
 	    _level(socketID,args[1]);
 	    return;
+	}else{
+	    _level(socketID,0);
+	    return;
 	}
 
-	ee.emit(socketID+'err',errors['USAGE']);
-
     }catch(e){
-	ee.emit(socketID+'err',u(errors['UNDEFINED'],'Module',e));
+	ee.emit(socketID+'err',u(errors['UNDEFINED'],'verbose',e));
     }
 }
 
-const _level = (socketID,numlevel)=>{
+const _level = function(socketID,numlevel){
     try{
 	if(  numlevel >= 10){numlevel =9;}//security
 	
@@ -57,62 +52,45 @@ const _level = (socketID,numlevel)=>{
 	ee.emit(socketID+'err',u(errors['UNDEFINED'],'Module',e));
     }
 }
-const _welcome = (socketID)=>{
+const _welcome = function(socketID){
     for(let l=1;l<= level;l++){ 
 	_on_socket(l,socketID);
     }
 }
 
 
-const _on_socket = (level,socketID)=>{
+const _on_socket = function(level,socketID){
     j.ioc[socketID].join('LOG'+level); 
 }
 
 
-const _off_socket = (level,socketID)=>{
+const _off_socket = function(level,socketID){
     j.ioc[socketID].leave('LOG'+level);
 }
 //mandatory for require module
-const load = (socketID)=>{
-    
-    // name command   <function>
-    ee.on(name,_verbose);
+const load = function(socketID){
     ee.on('send_welcome',_welcome);
-
-    //create mem internal for name command - Information 
-    j.list_command[name]= 'Log level info in console';
-
-    //create info for usage comand 
-    j.list_usage_command[name]  = name+' <level>'+"\r\n";
-
-    //create array to autocomplete terminal commands
-    j.list_auto_command[name] = null;//not arguments
-
-    //emit to terminal the autocomplete value
-    ee.emit('send_autocomplete',name,j.list_auto_command[name]);
-
-
 }
 
 
 //mandatory for require unload module
-const unload = (socketID)=>{
-    //delete 
-    ee.off(name,_verbose);
-    ee.off('send_welcome',_welcome );
+const unload = function(socketID){
     for(let l=1;l<=level;l++){ 
 	_off_socket(l,socketID);
     }
-
-    //deletes infos, usages and autocompletes
-    delete j.list_command[name];
-    delete j.list_usage_command[name];
-    delete j.list_auto_command[name];
-    ee.emit('del_autocomplete',name);
 }
 
 
 module.exports = {
-load,
-unload
+    command : {
+	'verbose' : {
+	    description : 'Log level info in console',
+	    usage : 'verbose <level>',
+	    auto  : null
+	}
+    },
+    verbose,
+    load,
+    unload,
+    autoload : true
 }

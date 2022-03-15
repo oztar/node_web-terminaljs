@@ -13,20 +13,22 @@ const errors = {
     UNDEFINED    : '%s internal error: \r\n %s'
 };
 
-const _help = function(socketID,args){
+const help = function(socketID,args){
     try{
 	let response = 'Help command:'+"\n\r";
 	if( args[1] === undefined){
 	    
 	    for( let com in j.list_command){
-		response += com+'\t'+j.list_command[com]+"\n\r";
+		response += j.f.col(com,0);
+		response += j.f.col(j.list_command[com],0);
+		response += "\n\r";
 	    }
 	}else if( args[1] == 'usage'){
 	    if(  j.list_command[args[2]] === undefined){
 		ee.emit(socketID+'err',errors['NOT_FOUND']);
 		return;
 	    }else{
-		response += j.list_usage_command[args[2]];
+		response += j.f.col(j.list_usage_command[args[2]],0);
 	    }
 	}else{
 	    ee.emit(socketID+'err',errors['HELP_USAGE']);
@@ -131,46 +133,36 @@ const _module = function(socketID,args){
     }
 }
 
-const _saveConfig = function(socketID,args){
+const save = function(socketID,args){
     ee.emit('save:config',j.modules);
-    ee.emit(socketID,'Save Config');
+    ee.emit(socketID,'Save Config sended');
 }
 
-const load = (socketID)=>{
-    ee.on('help',_help);
-    ee.on('module',_module);
-    ee.on('save',_saveConfig);
-    j.list_command['help']= 'Info';
-    j.list_command['save']= 'Grabar Configuracion';
-    j.list_command['module']= 'Module - Commands Modules';
-    j.list_usage_command['help']  = 'help - List command available'+"\r\n";
-    j.list_usage_command['help'] += 'help usage <command>';
-    j.list_usage_command['module']  = 'module load<name>'+"\r\n";
-    j.list_usage_command['module'] += 'module  show - List modules loaded'+"\r\n";
-    j.list_usage_command['module']+= 'module unload  <name>';
-    j.list_auto_command['help'] = ['usage'];
-    j.list_auto_command['save'] = [''];
-    j.list_auto_command['module'] = ['show','reload','load','unload','list'];
-    ee.emit('send_autocomplete','help',j.list_auto_command['help']);
-    ee.emit('send_autocomplete','module',j.list_auto_command['module']);
-}
+const load = function(socketID){}
+const unload = function(socketID){}
 
-const unload = (socketID)=>{
-    ee.off('help',_help);
-    ee.off('module',_module);
-    ee.off('save',_saveConfig);
-    delete j.list_command['help'];
-    delete j.list_command['module'];
-    delete j.list_usage_command['help'];
-    delete j.list_usage_command['module'];
-    delete j.list_auto_command['help'];
-    delete j.list_auto_command['module'];
-    ee.emit('del_autocomplete','help');
-    ee.emit('del_autocomplete','module');
-    ee.emit('del_autocomplete','module unload');
-    ee.emit('del_autocomplete','module load');
-}
 module.exports = {
+    command : {
+	'help' : {
+	    description : 'Info',
+	    usage : 'help - List command available\r\nhelp usage <command>',
+	    auto  : ['usage']
+	},
+	'module' : {
+	    description : 'Module - Commands Modules',
+	    usage : 'module load<name>\r\nmodule  show - List modules loaded\r\nmodule unload <name>',
+	    auto  : ['show','reload','load','unload','list']
+	},
+	'save' : {
+	    description : 'Save module list loaded',
+	    usage : 'save',
+	    auto  : ['']
+	}
+    },
+    help,
+    module :  _module,
+    save,
     load,
-    unload
+    unload,
+    autoload : false
 }

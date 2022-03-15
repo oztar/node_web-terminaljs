@@ -5,10 +5,11 @@ let ee = require('../').ee;
 let j  = require('../').options;
 
 const coreModules = {
-  	wtm_memory : true,
-	wtm_restart: true,
-	wtm_utils  : true,
-	wtm_verbose: true
+    wtm_memory : true,
+    wtm_restart: true,
+    wtm_utils  : true,
+    wtm_verbose: true,
+    wtm_echo   : true
 }
 const corePath = __dirname+'/';//modules Core
 
@@ -18,9 +19,26 @@ const load_module = function(socketID,name,path = j.path){
 	ee.emit(socketID,'Loading '+name);
     }
 
+    //load module
     j.module[name]  = require(path+name);
     j.modules[name] = true;
-    j.module[name].load(socketID);
+
+    //set commands
+    for( let moduleName in j.module[name].command){	
+	const command = j.module[name].command[moduleName];
+	ee.on( moduleName , j.module[name][moduleName]);
+	j.list_command[moduleName]       = command.description;
+	j.list_usage_command[moduleName] = command.usage;
+	j.list_auto_command[moduleName]  = command.auto;
+	ee.emit('send_autocomplete',moduleName,j.list_auto_command[moduleName]);
+    }
+
+
+    //auto start
+    if( j.module[name].autoload){
+	j.module[name].load(socketID);
+    }
+
     if( socketID !== null){
 	ee.emit(socketID,'Load '+name);
     }
@@ -29,10 +47,27 @@ const unload_module = function(socketID,name,path = j.path){
     if( socketID !== null){
 	ee.emit(socketID,'unloading '+name);
     }
-    j.module[name].unload(socketID);
+
+    //auto unload
+    if( j.module[name].autoload){
+	j.module[name].unload(socketID);
+    }
+
+    //unset commands
+    for( let moduleName in j.module[name].command){
+
+	ee.off( moduleName , j.module[name][moduleName]);
+	delete j.list_command[moduleName];
+	delete j.list_usage_command[moduleName];
+	delete j.list_auto_command[moduleName];
+	ee.emit('del_autocomplete',moduleName);
+    }
+
+    //unload module
     delete require.cache[require.resolve(path+name)];
     delete j.module[name];
     j.modules[name] = false;
+
     if( socketID !== null){
 	ee.emit(socketID,'unload '+name);
     }

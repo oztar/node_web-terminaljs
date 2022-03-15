@@ -1,7 +1,7 @@
 'use strict'
 let ee = require('../').ee;
 let j  = require('../').options;
-let u  = require('../').utils;
+let u  = require('../').u;
 
 
 ee.on('LOG',function(level){

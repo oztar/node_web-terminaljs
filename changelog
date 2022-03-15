@@ -1,3 +1,10 @@
+##Version 0.0.2
+	new format module load
+	default module -> wtm_default
+	example webTerminal
+	Bug&Fixed
+	- Load Modules
+	- Verbose
 ##version 0.0.1
 	create web.
 	create terminal.

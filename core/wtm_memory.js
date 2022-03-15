@@ -2,10 +2,15 @@
 let ee = require('../').ee;
 let j  = require('../').options;
 
-const name  = 'memory';
 const errors = {
     UNDEFINED    : '%s internal error:'+"\r\n"+'%s'
 };
+
+const memoryCom = {
+    description : 'Memory - List memory usage nodejs',
+    usage : 'memory \n\rmem',
+    auto  : null
+}
 
 const _memory = function(socketID){
     try{
@@ -17,34 +22,25 @@ const _memory = function(socketID){
 	}
 	ee.emit(socketID,response);
     }catch(e){
-	ee.emit(socketID+'err',u(errors['UNDEFINED'],name,e));
+	ee.emit(socketID+'err',u(errors['UNDEFINED'],'memory',e));
     }
 }
 
 
-const load = (socketID)=>{
-    ee.on(name,_memory);
-    ee.on('mem',_memory);//alias memory
-    j.list_command[name]= 'Memory';
-    j.list_command['mem']= 'Memory';
-    j.list_usage_command[name]  = 'memory - List memory usage nodejs';
-    j.list_usage_command['mem'] = 'mem alias memory '+"\r\n";
-    j.list_usage_command['mem'] += j.list_usage_command[name]
+const load = function(socketID){}
 
-    j.list_auto_command[name] = null;//not arguments
-    ee.emit('send_autocomplete',name,j.list_auto_command[name]);
-}
+const unload = function(socketID){}
 
-const unload = (socketID)=>{
-    ee.off(name,_memory);
-    ee.off('mem',_memory);
-    delete j.list_command[name];
-    delete j.list_command['mem'];
-    delete j.list_usage_command[name];
-    delete j.list_usage_command['mem'];
-    ee.emit('del_autocomplete',name);
-}
+
+
 module.exports = {
-load,
-unload
+    command : {
+	'mem' : memoryCom,
+	'memory' : memoryCom,
+    },
+    memory : _memory,
+    mem    : _memory,
+    load,
+    unload,
+    autoload : false
 }

@@ -14,23 +14,26 @@ const _iot    = require('./ioTerminal');
 const _html   = require('./web');
 const _opt    = require('./opt');
 
-const options = {
-    proto : 'http',
-    publicip : '127.0.0.1',
-    port  : 80,
-    path : '/modules',
+let options = {
+    proto      : 'http',
+    publicip   : '127.0.0.1',
+    port       : 80,
+    path       : __dirname+'/../../modules/',
     lngTimeout : 'comand not found',
-    list_command : {},//list enabled commands
+    verbose    : 0,
+    list_command       : {},//list enabled commands
     list_usage_command : {},//autocomplete list v1
-    list_auto_command : {},//autocomplete list v1
-    ioc : {},//list io clients	
-    modules : {},//list modules loaded
-    module : {}//funstions module 
+    list_auto_command  : {},//autocomplete list v1
+    ioc                : {},//list io clients	
+    modules            : {},//list modules loaded
+    module             : {},//funstions module
+    f                  : {}//functions
 };
 
 module.exports = {
     options,
     u,
+    functions : {},
     ee,
     terminaljs: function(options,express,app,io,path = '/'){
 	_opt(options);
@@ -41,8 +44,10 @@ module.exports = {
 	app.use(path, express.static(__dirname +'/static/'));
 	app.use(path, _html);
 	
-	io = _iot(io);//start socket io
+	options.io = _iot(io);//start socket io
     }
 }
 
 require('./core');
+
+module.exports.functions =  options.f;
