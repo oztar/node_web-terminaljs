@@ -9,7 +9,8 @@ const errors = {
     HELP_USAGE   : 'Help arguments error, using help OR help usage <command>',
     LOAD_USAGE   : 'Load arguments error. "help usage load" ',
     UNLOAD_USAGE : 'Unload arguments error. "help usage unload" ',
-    UNDEFINED    : '%s internal error:'+"\r\n"+'%s'
+    PATH         : 'Path not found \r\n %s',
+    UNDEFINED    : '%s internal error: \r\n %s'
 };
 
 const _help = function(socketID,args){
@@ -84,6 +85,11 @@ const _module_unload = function(socketID,args){
     }
 }
 const _module_list =  function(socketID,args){
+    if (! fs.existsSync(j.path)) {
+	ee.emit(socketID+'err',u(errors['PATH'],j.path)); 
+	return;
+    }
+    
     fs.readdir(j.path, (err, files) => {
 	files.forEach(name => {
 	    name = name.replace('.js','');
