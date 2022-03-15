@@ -1,0 +1,33 @@
+<%- include ('../partials/header', {proto,public_ip,port,txtTimeout}) %>
+<body>
+ <div id="bloquer" style="display:none;"></div>
+ <div id="alerta" style="display:none;">
+   <div id="mensajebox">
+     <div id="mensaje">
+       <div id="mesaje_titlebox"> 
+	 <div id="alertaheader"> Mensaje</div>
+	 <div id="alertaclose" class="mensaje_titlebox_close" style="display:block;" onclick="closed('#alerta')"> x </div>
+       </div>
+      <div id="mensaje_text">  </div>
+      <div id="mensaje_btext">  </div>
+     </div>     
+   </div>
+ </div>
+ <div id="modal" style="display:none;">
+   <div id="modalbox">
+
+     <div id="modal_box">
+       <div id="mesaje_titlebox"> 
+	 <div id="modalheader"> Modal</div>
+	 <div id="modalclose" class="modal_titlebox_close" style="display:block;" onclick="closed('#modal')"> x </div>
+       </div>
+      <div id="modal_text">  </div>
+      <div id="modal_btext">  </div>
+     </div>     
+   </div>
+ </div>
+ <div id="terminal">
+ </div>
+</div>
+</body>
+<%- include ('../partials/foo', {version}) %>
