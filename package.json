@@ -1,7 +1,7 @@
 {
   "name": "web-terminaljs",
-  "version": "0.0.2",
-  "description": "Web terminal, control actios and modules",
+  "version": "0.0.3",
+  "description": "Web terminal, control actions and modules",
   "main": "index.js",
   "scripts": {
     "test": "mocha test.js",
@@ -14,10 +14,12 @@
     "url": "git+https://github.com/oztar/node_config-autoreload.git"
   },
   "keywords": [
-    "config",
-    "autoreload",
-    "config-autoreload",
-    "refresh-json"
+      "terminal",
+      "terminaljs",
+      "web-terminal",
+      "console",
+      "webconsole",
+      "consolejs"
   ],
   "bugs": {
     "url": "https://github.com/oztar/ode_web-terminaljs/issues"

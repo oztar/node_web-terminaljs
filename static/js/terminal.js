@@ -23,9 +23,9 @@ jQuery(function($, undefined) {
 	autocompleteMenu: true,	
 	completion: completions,
         greetings: '',
-        name: 'Pirate stelar',
-        height: 600,
-        prompt: 'PS> '
+        name: 'Web Terminal JS',
+        height: '100%',
+        prompt: 'wt> '
     });
 
 

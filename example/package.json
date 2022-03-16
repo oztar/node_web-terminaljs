@@ -12,6 +12,7 @@
   "dependencies": {
     "express": "^4.17.3",
     "http": "0.0.1-security",
-    "socket.io": "^4.4.1"
+    "socket.io": "^4.4.1",
+      "web-terminaljs" : "^0.0.3"
   }
 }

@@ -75,6 +75,7 @@ const unload_module = function(socketID,name,path = j.path){
 
 
 
+
 for( let name in coreModules){
     load_module(null,name,corePath);
 }
@@ -83,3 +84,12 @@ for( let name in coreModules){
 
 ee.on('command:load_module',load_module);
 ee.on('command:unload_module',unload_module);
+ee.once('start|load_modules', function(){
+    for( let name in j.modules){
+	console.log(name);
+	if( j.modules[name]){
+	    load_module(null,name,j.path);
+	    console.log(name,'loaded');
+	}
+    }
+});

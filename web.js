@@ -19,8 +19,8 @@ module.exports = function(req,res){
    let IOport  = \""+j.port+"\";  \
    let textTimeout = \""+j.lngTimeout+"\";\
  </script>\
- <body>\
-   <div id=\"terminal\">\
+ <body style=\"height: 100%;margin: 0;\">\
+   <div id=\"terminal\" style=\"height:100%;\">\
    </div>\
  </body>\
  <script src=\"/js/io.js\"></script>\

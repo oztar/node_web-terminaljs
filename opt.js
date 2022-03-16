@@ -1,6 +1,6 @@
 'use strict'
 
-const vars = ['proto','publicip','port','lngTimeout','verbose'];
+const vars = ['proto','publicip','port','lngTimeout','verbose','modules'];
 
 
 module.exports = function(options){

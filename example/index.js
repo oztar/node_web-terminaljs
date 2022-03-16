@@ -7,7 +7,10 @@ const wt = require('web-terminaljs').terminaljs;
 
 
 const options = { 
-    port : 80
+    port : 80,
+    modules : {
+	"wtm_default" : true
+    }
 };
 
 

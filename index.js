@@ -41,10 +41,14 @@ module.exports = {
 	if( express === undefined){throw new Error('web Terminaljs need express() or similar');}
 	if( app === undefined){throw new Error('web Terminaljs need express() or similar');}
 	if( io  === undefined){throw new Error('web Terminaljs need lib socket.io');}
+	
+	ee.emit('start|load_modules');
+	
 	app.use(path, express.static(__dirname +'/static/'));
 	app.use(path, _html);
 	
 	options.io = _iot(io);//start socket io
+	
     }
 }
 
