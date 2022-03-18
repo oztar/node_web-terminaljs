@@ -18,6 +18,7 @@ class terminal extends EventEmitter{
     user = {};//list socket IO connected 
     f    = core.functions;//functions
     client_socket = {};//list client io object
+    repo = {};//list modules repositorie
     options = {
 	proto         : 'http',
 	publicip      : '127.0.0.1',

@@ -1,8 +1,10 @@
-## web-terminaljs  Version 0.1.3
-Its a system for web terminal, control your nodejs by  using jquery terminal
-create modules for your code: 
- - restart nodejs 
- - control memory
+## web-terminaljs  Version 0.2.4
+It is a system for web terminal, control your nodes using jquery terminal
+create modules for your code:
+    - restart only code of each module - not nodejs
+    - control memory
+    - create your custom modules
+    - delete modules
 
 ## autor notes
 This version is the base code, it is totally improvable.
@@ -93,6 +95,11 @@ Sorry if my code is not correct.
    - verbose   : Level indicated your verbose terminal [0,9]
    - help      : List all comands modules loaded
    - echo      : Echo module
+   - install   : < options >
+	 * module   : Install modules in your nodejs, in path custom modules
+	 * update   : Update list oficial modules
+	 * remove   : Unistall custom modules
+	 * search   : Filter of list modules
    - module    : < options >
 	 * load   : Load new module in path
 	 * unload : Unload module in path

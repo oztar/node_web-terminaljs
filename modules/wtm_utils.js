@@ -72,8 +72,7 @@ const module_load = function(socketID,args){
 	}
 
 	if( fs.existsSync(this.options.path+args[2]+'.js') ){
-
-	    this.emit('command:load_module',socketID,args[2]);
+	    this._load_module(socketID,args[2]);
 	    return;
 
 	}else{
@@ -94,10 +93,15 @@ const module_unload = function(socketID,args){
 	    this.emit(socketID+'err',errors['UNLOAD_USAGE']);
 	    return;
 	}
-	if(  this.options.modules[args[2]]){ 
-	    this.emit('command:unload_module',socketID,args[2]);
-	    return;
+	if( this.list_modules[args[2]] !== undefined){
+	    if(  this.list_modules[args[2]]){ 
+		this._unload_module(socketID,args[2]);
+		return;
+	    }
 	}
+
+	this.emit(socketID+'err',u(errors['UNDEFINED'],'Module UnLoad',' Not exist'));
+	
     }catch(e){ 
 	this.emit(socketID+'err',u(errors['UNDEFINED'],'Module Unload',e));
     }

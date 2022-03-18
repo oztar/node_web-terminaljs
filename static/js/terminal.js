@@ -15,6 +15,20 @@ async function digestMessage(message){
     return hash;
 }
 
+function progress(percent, width) {
+    var size = Math.round(width*percent/100);
+    var left = '', taken = '', i;
+    for (i=size; i--;) {
+        taken += '=';
+    }
+    if (taken.length > 0) {
+        taken = taken.replace(/=$/, '>');
+    }
+    for (i=width-size; i--;) {
+        left += ' ';
+    }
+    return '[' + taken + left + '] ' + percent + '%';
+}
 
 jQuery(function($, undefined) {
 
@@ -53,7 +67,20 @@ jQuery(function($, undefined) {
     socket.on('setPront', (result)=>{
 	terminal.set_prompt(result);
     });
-
+    socket.on('progress',(porcentual)=>{
+	if( porcentual == -1){
+	    terminal.echo(string + ' [[b;red;]fail]').set_prompt(prompt);
+	    return;
+	}
+	if(porcentual == 0){
+	    prompt = terminal.get_prompt();
+	}
+	string = progress(porcentual, 100);
+	terminal.set_prompt(string);
+	if( porcentual == 100){
+	    terminal.echo(string + ' [[b;green;]ok]').set_prompt(prompt);
+	}
+    });
     socket.on('loged', (name)=>{
 	terminal.set_mask(false); 
 	terminal.set_prompt(name+'@wt> ');

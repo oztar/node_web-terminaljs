@@ -2,28 +2,28 @@
 
 module.exports = {
     color: function(m,color){
-	return '[[;'+color+';]'+m+']';
+	return '[[;'+color+';]'+JSON.stringify(m)+']';
     },
     bold: function(m) {
-        return '[[b;rgba(255,255,255,0.9);]'+m+']';
+        return '[[b;rgba(255,255,255,0.9);]'+JSON.stringify(m)+']';
     },
     overline: function() {
-        return '[[o;;]'+m+']';
+        return '[[o;;]'+JSON.stringify(m)+']';
     },
     strike: function() {
-        return '[[s;;]'+m+']';
+        return '[[s;;]'+JSON.stringify(m)+']';
     },
     underline: function() {
-        return '[[u;;]'+m+']';
+        return '[[u;;]'+JSON.stringify(m)+']';
     },
     glow: function() {
-        return '[[g;;]'+m+']';
+        return '[[g;;]'+JSON.stringify(m)+']';
     },
     italic: function() {
-        return '[[i;;]'+m+']';
+        return '[[i;;]'+JSON.stringify(m)+']';
     },
     link: function(m,attrs) {
-        return '[[!;;;;' + attrs.href + ']'+m+']';
+        return '[[!;;;;' + attrs.href + ']'+JSON.stringify(m)+']';
     },
     teal : function(m,color = 'black'){
 	return "[[gb;teal;'+color+']" + m + "]";

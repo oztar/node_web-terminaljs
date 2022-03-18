@@ -1,5 +1,5 @@
 'use strict'
-
+const u = require('util').format;
 
 const coreModules = {
     wtm_memory : true,
@@ -7,7 +7,8 @@ const coreModules = {
     wtm_utils  : true,
     wtm_verbose: true,
     wtm_login  : true,
-    wtm_echo   : true
+    wtm_echo   : true,
+    wtm_install: true
 }
 const corePath = __dirname+'/../modules/';//modules Core
 
@@ -42,10 +43,9 @@ module.exports ={
 	    this.emit('send_autocomplete',moduleName,this.options.list_auto_command[moduleName]);
 	}
 		
-	//auto start
+	//auto start 
 	if( this.module[name].autoload){
 	    this[name+'_load'](socketID);
-	   // this.options.module[name]['load'](socketID);
 	}
 	
 	if( socketID !== null){
@@ -96,9 +96,6 @@ module.exports ={
 		this._load_module(null,name,this.options.path);
 	    }
 	}
-	
-	this.on('command:load_module',this._load_module);
-	this.on('command:unload_module',this._unload_module);
     }
 }
 

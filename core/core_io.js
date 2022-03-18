@@ -80,12 +80,21 @@ module.exports = function(){
 	const del_autocomplete = function(con){
 	    socket.emit('delete:command',con);
 	}
+	const _progress = function(porcentual){
+	    socket.emit('progress',porcentual);
+	}
 	
 	const close_socket = ()=>{
 	    this.off(socket.id,send_socket);
-	    this.off(socket.id+'err',send_err_socket);
+	    this.off(socket.id+'err',send_err_socket);	
+	    this.off(socket.id+'login|true',_loged);
+	    this.off(socket.id+'login|false',_unlogin);
+	    this.off(socket.id+'progress',_progress);
+
 	    this.off('send_autocomplete',send_autocomplete);
 	    this.off('del_autocomplete',del_autocomplete);
+	    this.off('LOGe',send_err_socket);
+
 	    delete this.client_socket[socket.id];
 	}
 	
@@ -104,6 +113,7 @@ module.exports = function(){
 	this.on(socket.id+'err',send_err_socket);
 	this.on(socket.id+'login|true',_loged);
 	this.on(socket.id+'login|false',_unlogin);
+	this.on(socket.id+'progress',_progress);
 	
 	//socket listeners
 	socket.on('terminal:command',emit_terminal);
