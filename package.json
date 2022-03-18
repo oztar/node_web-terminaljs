@@ -1,17 +1,16 @@
 {
   "name": "web-terminaljs",
-  "version": "0.2.4",
-  "description": "Web terminal, control actios and modules",
+  "version": "0.2.4c",
+  "description": "Web terminal, control actions and modules",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test.js",
     "strt": "node index.js"
   },
   "author": "Alfredo Roman Dominguez",
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oztar/node_config-autoreload.git"
+    "url": "git+https://github.com/oztar/node_web-terminaljs.git"
   },
   "keywords": [
       "terminal",
@@ -25,12 +24,9 @@
       "reload modules"
   ],
   "bugs": {
-    "url": "https://github.com/oztar/ode_web-terminaljs/issues"
+    "url": "https://github.com/oztar/node_web-terminaljs/issues"
   },
-  "homepage": "https://github.com/oztar/ode_web-terminaljs#Readme",
+  "homepage": "https://github.com/oztar/node_web-terminaljs#Readme",
   "dependencies": {},
-  "devDependencies": {
-    "chai": "^4.3.4",
-    "mocha": "^8.4.0"
-  }
+  "devDependencies": {}
 }
