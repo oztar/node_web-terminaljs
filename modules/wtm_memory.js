@@ -1,6 +1,5 @@
-'use strict'
-let ee = require('../').ee;
-let j  = require('../').options;
+ 'use strict'
+const u = require('util').format;
 
 const errors = {
     UNDEFINED    : '%s internal error:'+"\r\n"+'%s'
@@ -20,9 +19,9 @@ const _memory = function(socketID){
 	    let mem = Math.round(used[key] / 1024 / 1024 * 100) / 100;
 	    response += key+' '+mem+'MB'+"\n";
 	}
-	ee.emit(socketID,response);
+	this.emit(socketID,response);
     }catch(e){
-	ee.emit(socketID+'err',u(errors['UNDEFINED'],'memory',e));
+	this.emit(socketID+'err',u(errors['UNDEFINED'],'memory',e));
     }
 }
 

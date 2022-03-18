@@ -1,7 +1,7 @@
 {
   "name": "web-terminaljs",
-  "version": "0.0.3",
-  "description": "Web terminal, control actions and modules",
+  "version": "0.1.3",
+  "description": "Web terminal, control actios and modules",
   "main": "index.js",
   "scripts": {
     "test": "mocha test.js",
@@ -16,14 +16,19 @@
   "keywords": [
       "terminal",
       "terminaljs",
+      "jquery terminal",
+      "jquery-terminal",
       "web-terminal",
-      "console",
-      "webconsole",
-      "consolejs"
+      "web-terminaljs",
+      "modules"
   ],
   "bugs": {
     "url": "https://github.com/oztar/ode_web-terminaljs/issues"
   },
   "homepage": "https://github.com/oztar/ode_web-terminaljs#Readme",
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "mocha": "^8.4.0"
+  }
 }

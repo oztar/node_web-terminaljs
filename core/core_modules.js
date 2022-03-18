@@ -1,95 +1,104 @@
 'use strict'
 
 
-let ee = require('../').ee;
-let j  = require('../').options;
-
 const coreModules = {
     wtm_memory : true,
     wtm_restart: true,
     wtm_utils  : true,
     wtm_verbose: true,
+    wtm_login  : true,
     wtm_echo   : true
 }
-const corePath = __dirname+'/';//modules Core
+const corePath = __dirname+'/../modules/';//modules Core
+
+module.exports ={
+    load_module : function(socketID,name,path = this.options.path){
+	if( socketID !== null){
+	    this.emit(socketID,'Loading '+name);
+	}	
 
 
-const load_module = function(socketID,name,path = j.path){
-    if( socketID !== null){
-	ee.emit(socketID,'Loading '+name);
-    }
+		     
+	//load module	
+	this.module[name]  = require(path+name); 
+	this.list_modules[name] = true;
 
-    //load module
-    j.module[name]  = require(path+name);
-    j.modules[name] = true;
+	//set all functions
+	for( let expName in this.module[name]){
+	    if( expName == 'command'){continue;}
 
-    //set commands
-    for( let moduleName in j.module[name].command){	
-	const command = j.module[name].command[moduleName];
-	ee.on( moduleName , j.module[name][moduleName]);
-	j.list_command[moduleName]       = command.description;
-	j.list_usage_command[moduleName] = command.usage;
-	j.list_auto_command[moduleName]  = command.auto;
-	ee.emit('send_autocomplete',moduleName,j.list_auto_command[moduleName]);
-    }
-
-
-    //auto start
-    if( j.module[name].autoload){
-	j.module[name].load(socketID);
-    }
-
-    if( socketID !== null){
-	ee.emit(socketID,'Load '+name);
-    }
-}
-const unload_module = function(socketID,name,path = j.path){
-    if( socketID !== null){
-	ee.emit(socketID,'unloading '+name);
-    }
-
-    //auto unload
-    if( j.module[name].autoload){
-	j.module[name].unload(socketID);
-    }
-
-    //unset commands
-    for( let moduleName in j.module[name].command){
-
-	ee.off( moduleName , j.module[name][moduleName]);
-	delete j.list_command[moduleName];
-	delete j.list_usage_command[moduleName];
-	delete j.list_auto_command[moduleName];
-	ee.emit('del_autocomplete',moduleName);
-    }
-
-    //unload module
-    delete require.cache[require.resolve(path+name)];
-    delete j.module[name];
-    j.modules[name] = false;
-
-    if( socketID !== null){
-	ee.emit(socketID,'unload '+name);
-    }
-}
-
-
-
-
-for( let name in coreModules){
-    load_module(null,name,corePath);
-}
-
-
-
-ee.on('command:load_module',load_module);
-ee.on('command:unload_module',unload_module);
-ee.once('start|load_modules', function(){
-    for( let name in j.modules){
-	console.log(name);
-	if( j.modules[name]){
-	    load_module(null,name,j.path);
-	    console.log(name,'loaded');
+	    this[name+'_'+expName] = this.module[name][expName];
 	}
+
+	//set commands
+	for( let moduleName in this.module[name].command){	
+	    const command = this.module[name].command[moduleName];
+	    this['module_'+moduleName]  = this[name+'_'+moduleName];//function command 
+
+	    this.options.list_command[moduleName]       = command.description;
+	    this.options.list_usage_command[moduleName] = command.usage;
+	    this.options.list_auto_command[moduleName]  = command.auto;
+
+	    this.emit('send_autocomplete',moduleName,this.options.list_auto_command[moduleName]);
+	}
+		
+	//auto start
+	if( this.module[name].autoload){
+	    this[name+'_load'](socketID);
+	   // this.options.module[name]['load'](socketID);
+	}
+	
+	if( socketID !== null){
+	    this.emit(socketID,'Load '+name);
+	}
+
+    },
+    unload_module : function(socketID,name,path = this.options.path){
+	if( socketID !== null){
+	    this.emit(socketID,'unloading '+name);
+	}
+	
+	//auto unload
+	if( this.module[name].autoload){
+	    this[name+'_unload'](socketID);
+	}
+	
+	//unset all functions
+	for( let expName in this.module[name]){
+	    delete this[name+'_'+expName];
+	}	
+
+	//unset commands
+	
+	for( let moduleName in this.module[name].command){		
+	    delete this['module_'+moduleName];
+	    delete this.options.list_command[moduleName];
+	    delete this.options.list_usage_command[moduleName];
+	    delete this.options.list_auto_command[moduleName];
+	    this.emit('del_autocomplete',moduleName);
+	}
+	
+	//unload module
+	delete require.cache[require.resolve(path+name)];
+	delete this.module[name];
+	this.list_modules[name] = false;
+	
+	if( socketID !== null){
+	    this.emit(socketID,'unload '+name);
+	}
+    },
+    start_modules : function(){
+	for( let name in coreModules){
+	    this._load_module(null,name,corePath);
+	}
+	for( let name in this.options.modules){
+	    if( this.options.modules[name]){
+		this._load_module(null,name,this.options.path);
+	    }
+	}
+	
+	this.on('command:load_module',this._load_module);
+	this.on('command:unload_module',this._unload_module);
     }
-});
+}
+

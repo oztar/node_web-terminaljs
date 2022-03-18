@@ -2,30 +2,47 @@ let terminal_command_timeout = 0;
 let terminal_command_date = 0;
 let terminal_time_timeout = 10;//seconds 
 let terminal_autocomplete = {};
+
+function buf2Base64(buffer) {
+    return btoa(String.fromCharCode.apply(null, new Uint8Array(buffer)));
+}
+
+async function digestMessage(message){
+    const encoder = new TextEncoder();
+    const data = encoder.encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hash = await buf2Base64(hashBuffer);
+    return hash;
+}
+
+
 jQuery(function($, undefined) {
-    let terminal = $('#terminal').terminal(function(command) {
+
+    const comand = function(command) {
         if (command !== '') {
-            try {
+	    try {
 		if( terminalUnblockTimeout() == 1){
-		     socket.emit('terminal:command',command);
+		    socket.emit('terminal:command',command);
 		}else{
 		    e = '('+getTimeLeft(terminal_command_timeout)+'s unblocked)';
 		    this.error(new String('System Blocked '+e));
 		}
-            } catch(e) {		
+	    } catch(e) {		
 		terminalUnblockInTime();
                 this.error(new String(e));
-            }
+	    }
         } else { 
 	    this.error(new String('empty command using help'));
         }
-    }, {
+    };
+
+    let terminal = $('#terminal').terminal(comand, {
 	autocompleteMenu: true,	
 	completion: completions,
         greetings: '',
         name: 'Web Terminal JS',
         height: '100%',
-        prompt: 'wt> '
+	prompt : 'wt> '
     });
 
 
@@ -33,6 +50,29 @@ jQuery(function($, undefined) {
 	terminalUnblockInTime();
 	terminal.error(new String(err));
     }
+    socket.on('setPront', (result)=>{
+	terminal.set_prompt(result);
+    });
+
+    socket.on('loged', (name)=>{
+	terminal.set_mask(false); 
+	terminal.set_prompt(name+'@wt> ');
+	terminal.read(name+'@wt> ',comand);
+    });
+
+    socket.on('login', ()=>{
+	terminal.set_mask(false); 
+	terminal.read('login: ',function( name ){	    
+	    socket.emit('loginName',name);
+	});
+
+    });
+    socket.on('password', (nonce)=>{
+	terminal.set_mask('').read('pass: ',async function( name ){
+	    const digestBuffer = await digestMessage(nonce+name);
+	    await socket.emit('loginPass',digestBuffer);
+	});
+    });
 
     socket.on('result:command', (result)=>{
 	terminalUnblockInTime();

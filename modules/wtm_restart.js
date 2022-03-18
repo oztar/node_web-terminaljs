@@ -1,8 +1,5 @@
 'use strict'
-const ee = require('../').ee;
-const j  = require('../').options;
-const u  = require('../').u;
-
+const u  = require('util').format;
 const { spawn } = require('child_process');
 
 const name  = 'restart';
@@ -13,13 +10,13 @@ const errors = {
 
 const restartCon = {
     description : 'Restart nodejs program',
-    usage : 'restart now',
+    usage : 'Usage: restart now',
     auto  : ['now']
 }
 const restart = function(socketID,args){
     try{
 	if( args[1] == 'now'){
-	    ee.emit(socketID,'Restarting');
+	    this.emit(socketID,'Restarting\r\nyou need restart Terminal presh F5');
 	    process.on("exit", function () {
 		spawn(
 		    process.argv.shift(),
@@ -33,10 +30,10 @@ const restart = function(socketID,args){
 	    });
 	    process.exit();
 	}else{
-	    ee.emit(socketID,restartCon.usage);
+	    this.emit(socketID,restartCon.usage);
 	}
     }catch(e){
-	ee.emit(socketID+'err',u(errors['UNDEFINED'],'restart',e));
+	this.emit(socketID+'err',u(errors['UNDEFINED'],'restart',e));
     }
 }
 
@@ -44,25 +41,23 @@ const restart = function(socketID,args){
 
 const poweroffCon = {
     description : 'shutdown the program',
-    usage : 'poweroff now',
+    usage : 'Usage: poweroff now',
     auto  : ['now']
 }
 
 const poweroff = function(socketID,args){ 
     try{
 	if( args[1] == 'now'){
-	    ee.emit(socketID,'Power Off');
-	    process.exit();
+	    this.emit(socketID,'Power Off');
+	    process.exit(); 
+	    throw new Error('comand exec poweroff and not process.exit correct');
 	}else{
-	    ee.emit(socketID,poweroffCon.usage);
+	    this.emit(socketID,poweroffCon.usage);
 	}
     }catch(e){
-	ee.emit(socketID+'err',u(errors['UNDEFINED'],'poweroff',e));
+	this.emit(socketID+'err',u(errors['UNDEFINED'],'poweroff',e));
     }
 }
-
-const load = function(socketID){}
-const unload = function(socketID){}
 
 
 module.exports = {
@@ -72,7 +67,5 @@ module.exports = {
     },
     restart,
     poweroff,
-    load,
-    unload,
     autload : false
 }

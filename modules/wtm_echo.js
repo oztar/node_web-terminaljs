@@ -1,7 +1,5 @@
 'use strict'
-let ee = require('../').ee;
-let j  = require('../').options;
-let u  = require('../').u;//utils
+let u  = require('util').format;//utils
 
 //list of error, usage with utils
 const errors = {
@@ -19,13 +17,13 @@ const echoCon = {
 const echo = function(socketID,args){
     try{
 	if( args[1] === undefined){
-	    ee.emit(socketID,'echo null');
+	    this.emit(socketID,'echo null');
 	    return;
 	}else{
-	    ee.emit(socketID,j.f.color(args[1],'violet'));
+	    this.emit(socketID,this.f.color(args[1],'violet'));
 	}
     }catch(e){
-	ee.emit(socketID+'err',u(errors['UNDEFINED'],'verbose',e));
+	this.emit(socketID+'err',u(errors['UNDEFINED'],'verbose',e));
     }
 }
 const load = function(socketID){}

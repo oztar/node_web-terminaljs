@@ -1,10 +1,8 @@
 'use strict'
-let ee = require('../').ee;
-let j  = require('../').options;
-let u  = require('../').u;
 
+const u  = require('util').format;
 
-ee.on('LOG',function(level){
-    j.io.to('LOG'+level).emit('result:command',u(arguments[1]));
-});
-
+module.exports = function(level){
+    this.options.io.to('LOG'+level).emit('result:command',u(arguments[1]));
+}
+ 

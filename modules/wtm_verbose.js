@@ -1,9 +1,7 @@
 'use strict'
-let ee = require('../').ee;
-let j  = require('../').options;
-let u  = require('../').u;//utils
+const u  = require('util').format;//utils
 
-let level = j.verbose;
+let level = 0;
 
 //list of error, usage with utils
 const errors = {
@@ -15,68 +13,69 @@ const errors = {
 const verbose = function(socketID,args){
     try{
 	if( args[1] === undefined){
-	    ee.emit(socketID,'verbose level is '+level);
+	    this.emit(socketID,'verbose level is '+level);
 	    return;
 	}
+
 	if( parseInt(args[1])){
-	    _level(socketID,args[1]);
+	    this.wtm_verbose_flevel(socketID,args[1]);
 	    return;
 	}else{
-	    _level(socketID,0);
+	    this.wtm_verbose_flevel(socketID,0);
 	    return;
 	}
 
     }catch(e){
-	ee.emit(socketID+'err',u(errors['UNDEFINED'],'verbose',e));
+	this.emit(socketID+'err',u(errors['UNDEFINED'],'verbose',e));
     }
 }
 
-const _level = function(socketID,numlevel){
+const flevel = function(socketID,numlevel){
     try{
 	if(  numlevel >= 10){numlevel =9;}//security
 	
 	//change level
 	for( let l=1;l<= 9;l++){
 	    if( l > level && l <= numlevel){
-		_on_socket(l,socketID);
+		this.wtm_verbose_on_socket(l,socketID);
 	    }else if( l <= level && l > numlevel){
-		_off_socket(l,socketID);
+		this.wtm_verbose_off_socket(l,socketID);
 	    }
 	}
 	//save level
 	level = numlevel;
 	
 	//terminal 
-	ee.emit(socketID,'verbose in level '+level);
+	this.emit(socketID,'verbose in level '+level);
     }catch(e){
-	ee.emit(socketID+'err',u(errors['UNDEFINED'],'Module',e));
+	this.emit(socketID+'err',u(errors['UNDEFINED'],'Module',e));
     }
 }
-const _welcome = function(socketID){
+const welcome = function(socketID){
     for(let l=1;l<= level;l++){ 
-	_on_socket(l,socketID);
+	this.wtm_verbose_on_socket(l,socketID);
     }
 }
 
 
-const _on_socket = function(level,socketID){
-    j.ioc[socketID].join('LOG'+level); 
+const on_socket = function(level,socketID){
+    this.client_socket[socketID].join('LOG'+level); 
 }
 
 
-const _off_socket = function(level,socketID){
-    j.ioc[socketID].leave('LOG'+level);
+const off_socket = function(level,socketID){
+    this.client_socket[socketID].leave('LOG'+level);
 }
 //mandatory for require module
 const load = function(socketID){
-    ee.on('send_welcome',_welcome);
+    level = this.options.verbose;
+    this.on('send_welcome',this.wtm_verbose_welcome);
 }
-
 
 //mandatory for require unload module
 const unload = function(socketID){
     for(let l=1;l<=level;l++){ 
-	_off_socket(l,socketID);
+	this.wtm_verbose_off_socket(l,socketID);
     }
 }
 
@@ -89,7 +88,11 @@ module.exports = {
 	    auto  : null
 	}
     },
+    on_socket,
+    off_socket,
+    welcome,
     verbose,
+    flevel,
     load,
     unload,
     autoload : true
