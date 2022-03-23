@@ -19,6 +19,7 @@ class terminal extends EventEmitter{
     f    = core.functions;//functions
     client_socket = {};//list client io object
     repo = {};//list modules repositorie
+    installed = {};//list modules installed in custom path
     options = {
 	proto         : 'http',
 	publicip      : '127.0.0.1',
@@ -29,7 +30,6 @@ class terminal extends EventEmitter{
 	lngTimeout    : 'comand not found',
 	verbose       : 0,
 	login         : false, 
-	express       : '',//express
 	app           : '',//express()
 	io            : '',//sokect.io(http.createServer(app))
 	list_command       : {},//list enabled commands
@@ -48,6 +48,8 @@ class terminal extends EventEmitter{
     _welcome       = core.welcome;
     _start_web     = core.web.star_web
     _html          = core.web.html;
+    _basic         = core.web.basic;
+    _wtio          = core.web.io;
     _io            = core.io;
 
 

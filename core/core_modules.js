@@ -13,7 +13,7 @@ const coreModules = {
 const corePath = __dirname+'/../modules/';//modules Core
 
 module.exports ={
-    load_module : function(socketID,name,path = this.options.path){
+    load_module : async function(socketID,name,path = this.options.path,installed){
 	if( socketID !== null){
 	    this.emit(socketID,'Loading '+name);
 	}	
@@ -24,6 +24,23 @@ module.exports ={
 	this.module[name]  = require(path+name); 
 	this.list_modules[name] = true;
 
+	if( installed){	    
+	    //save pkg installed
+	    if(  this.module[name].pkg === undefined){
+		this.module[name].pkg = {
+		    version : '0.0',
+		    author  : 'undefined'
+		};
+	    }
+		 
+	    this.installed[ name ] = {
+		path    : this.options.path,
+		md5     : await this.wtm_install_calc_checksum(name),
+		version : this.module[name].pkg.version,
+		author  : this.module[name].pkg.author
+	    };
+	}
+	
 	//set all functions
 	for( let expName in this.module[name]){
 	    if( expName == 'command'){continue;}
@@ -87,13 +104,13 @@ module.exports ={
 	    this.emit(socketID,'unload '+name);
 	}
     },
-    start_modules : function(){
+    start_modules : async function(){
 	for( let name in coreModules){
-	    this._load_module(null,name,corePath);
+	    this._load_module(null,name,corePath,false);
 	}
 	for( let name in this.options.modules){
 	    if( this.options.modules[name]){
-		this._load_module(null,name,this.options.path);
+		this._load_module(null,name,this.options.path,true);
 	    }
 	}
     }

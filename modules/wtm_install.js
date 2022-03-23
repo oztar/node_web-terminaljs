@@ -1,4 +1,10 @@
 'use strict'
+/*
+  Author Alfredo Roman
+  Description Core Module Install
+  Version 0.2
+*/
+
 const u     = require('util').format
 const https = require('https');
 const fs    = require('fs');
@@ -50,27 +56,27 @@ const install = function(socketID,args){
 }
 
 //update list repositories
-const update = function(socketID,args){
+const update = async function(socketID,args){
     if( parseFloat(repoTime+repoMaxTime) > Date.now()){ 
 	this.emit(socketID,'Not Updating\r\ntime between update too short');
-	return;
+	return true;
     }
     repoTime = Date.now();
-    this.emit(socketID,'Updating');
-    get_page('https://raw.githubusercontent.com/oztar/wtm/main/list.json')
+    this.emit(socketID,'Repositorie Updating');
+    return await get_page('https://raw.githubusercontent.com/oztar/wtm/main/list.json')
 	.then( result=>{
 	    try{
 		this.repo = JSON.parse(result);
-		this.emit(socketID,'Repositorie updated');
+		this.emit(socketID,'Repositorie Updated');
 	    }catch(e){
 		this.emit(socketID+'err',u(errors['UNDEFINED'],'Result HTTPS JSON',e,result));
 	    }
+	    return true;
 	}); 
-    return;
 }
 
 //install function 
-const modules = function(socketID,args){
+const modules = async function(socketID,args){
     try {   
 	if( args[2] === undefined){ 
 	    this.emit(socketID+'err', u(errors['USAGE']));
@@ -79,7 +85,7 @@ const modules = function(socketID,args){
 
 	// more time witch out install update, force update
 	if( parseFloat(repoTime+repoMaxTime) < Date.now()){ 
-	    this.wtm_install_update(socketID,args);
+	    await this.wtm_install_update(socketID,args);
 	}
 
 	const spliter = args[2].split('@');//separated for version module@version
@@ -90,6 +96,19 @@ const modules = function(socketID,args){
 	}
 
 	if( spliter[1] === undefined){spliter[1] = this.repo[spliter[0] ].lasted}
+
+	const version = process.env.npm_package_dependencies_web_terminaljs.substring(1);
+	const pversion = parseInt( version.replace(/\./g,''));
+	if( this.repo[spliter[0]][spliter[1]].compatible === undefined){this.repo[spliter[0]][spliter[1]].compatible = '0'};
+	const cversion = parseInt( this.repo[spliter[0]][spliter[1]].compatible.replace(/\./g,''));
+	if( pversion > cversion ){
+	    this.emit(socketID,'\r\nCompatible:\t\t'+this.f.color('accepted','green'));
+	}else{
+	    this.emit(socketID,'\r\nCompatible:\t\t'+this.f.color('not compatible','red'));
+	    this.emit(socketID,'\r\n your version WT is '+version+' module need version >'+this.repo[spliter[0]][spliter[1]].compatible,'red');
+	    return;
+	}
+
 	
 	const realmodule = this.repo[spliter[0]][spliter[1]].file;
 	this.emit(socketID,'module download '+spliter[0]+' version '+spliter[1]);
@@ -110,8 +129,10 @@ const modules = function(socketID,args){
 					return
 				    }
 				    this.emit(socketID+'progress',75);
+				  
+				    //auto load installed
 				    this.emit(socketID,'module waiting to load '+spliter[0]);
-				    this._load_module(socketID,''+spliter[0]);
+				    this._load_module(socketID,''+spliter[0],undefined,true);
 				    this.emit(socketID+'progress',100);
 				});
 			    }else{
@@ -164,13 +185,20 @@ const remove  = function(socketID,args){
     }
     
     try{
-	this.emit(socketID+'progress',10);
-	fs.unlink(this.options.path+args[2]+'.js', (err) => {
-	    if (err) {
+	this.emit(socketID+'progress',10);	
+	fs.unlink(this.installed[args[2]].path
+		  +args[2]+'.js', (e) => {
+	    if (e) {
 		this.emit(socketID+'progress',-1);
 		this.emit(socketID+'err',u(errors['UNDEFINED'],'Remove module',args[2],e));
 		return
 	    }
+
+	    this.emit(socketID+'progress',99);
+	    delete this.installed[args[2]];
+	    
+
+	    
 	    this.emit(socketID+'progress',100);
 	    this.emit(socketID,'module removed');
 	})
@@ -182,48 +210,60 @@ const remove  = function(socketID,args){
 }
 
 //checksum function
-const checksum  = function(socketID,args){  
+const checksum  = async function(socketID,args){
     //si no envia argumento no hacemos nada
     if( args[2] === undefined){ 
 	this.emit(socketID+'err', u(errors['USAGE']));
 	return;
     }
 
+    const {err,md5} = await this.wtm_install_calc_checksum(args[2])
+    if(err){
+	this.emit(socketID+'err',u(err));
+    }else{
+	this.emit(socketID,md5);
+    }
+}
+
+const calc_checksum = async function(name){
+
     //si no existe la carpeta, no hacemos nada
     if (! fs.existsSync(this.options.path)) {
-	this.emit(socketID+'err',u(errors['PATH'],this.options.path)); 
-	return;
+	return [u(errors['PATH'],this.options.path)];
     }
     //si no esta instalado no hacemos nada
-    if( this.list_modules[args[2]] === undefined){ 
-	this.emit(socketID+'err',u(errors['NOT_INSTALL'],args[2]));
-	return;
+    if( this.list_modules[name] === undefined){ 
+	return [u(errors['NOT_INSTALL'],name)];
     }
 
-    const data = fs.readFileSync(this.options.path+args[2]+'.js', {encoding:'utf8', flag:'r'});
-    const md5 = md5checksum(data)
+    const data = fs.readFileSync(this.options.path+name+'.js', {encoding:'utf8', flag:'r'});
+    const md5 = await md5checksum(data)
 	.then( result=>{
-	    this.emit(socketID,u(result));
+	    return result
 	});
+    
+    return [null,md5];
 }
 
 
-//search function
-const search = function(socketID,args){ 
+//list function
+const list_list = function(socketID,args,list){
+    
     let res ='';
     let pasa =0;
     if( args[2] !== undefined){
 	 this.emit(socketID,'filter: '+args[2]);
     }
-    for( let i in this.repo){
+    for( let i in list){
 	if( args[2] !== undefined){
 	    if( args[2] != i){continue;}
 	}
 	pasa = 0;
 	res += this.f.col(i,0);
-	for( let v in this.repo[i]){
+	for( let v in list[i]){
 	    if( pasa == 1){ res += '\t\t\t';}
-	    res += v;
+	    res += this.f.col(v,0);
+	    res += this.f.col(list[i][v],0);
 	    res +='\r\n';
 	    pasa = 1;
 	}
@@ -232,12 +272,73 @@ const search = function(socketID,args){
     }
     this.emit(socketID,res);
 }
+
+//search function
+const search = function(socketID,args){
+    this.wtm_install_list_list(socketID,args,this.repo);
+    if( args[2] !== undefined){
+	this.wtm_install_info(socketID,args);
+    }
+}
+const list = function(socketID,args){
+    this.wtm_install_list_list(socketID,args,this.installed);
+}
+
+
+const info = async function(socketID,args){
+    // more time witch out install update, force update
+    if( parseFloat(repoTime+repoMaxTime) < Date.now()){
+	await this.wtm_install_update(socketID,args);
+    }
+
+    let res ='';
+    try {
+	if( args[2] === undefined){
+	    this.emit(socketID,'Error command, please use help usage install');
+	    return;
+	}
+
+	const spliter = args[2].split('@');//separated for version module@version
+	if( spliter[1] === undefined){spliter[1] = this.repo[spliter[0] ].lasted}
+	
+	if( this.repo[ args[2]] === undefined){
+	    this.emit(socketID+'err',u(errors['NOT_EXIST'],args[2])); 
+	    return;
+	}
+
+	const infoModule = this.repo[spliter[0]][spliter[1]];
+	const version = process.env.npm_package_dependencies_web_terminaljs.substring(1);
+	const pversion = parseInt( version.replace(/\./g,''));
+	if( infoModule.compatible === undefined){infoModule.compatible = '0'};
+	const cversion = parseInt( infoModule.compatible.replace(/\./g,''));
+	
+	res = '\r\nInfo module: '+spliter[0]+'\r\n';
+	res += '\r\nAuthor:\t\t\t'+infoModule.author;
+	res += '\r\nVersion:\t\t'+infoModule.version;
+	res += '\r\nLicense:\t\t'+infoModule.license;
+	res += '\r\nMd5:\t\t\t'+infoModule.md5;	    
+
+	if( pversion > cversion ){
+	    res += '\r\nCompatible:\t\t'+this.f.color('accepted','green');
+	}else{
+	    res += '\r\nCompatible:\t\t'+this.f.color('not compatible','red');
+	    res += '\r\n your version WT is '+version+' module need version >'+infoModule.compatible,'red';
+	}
+	
+	res += '\r\nDescription:\t'+infoModule.description;
+	this.emit(socketID,res);
+
+    }catch(e){
+	this.emit(socketID+'err',u(e));
+    }
+}
+
 module.exports = {
     command : {
 	install : {
 	    description : 'System Instalation Repositorie',
-	    usage : 'name [module|remove|update|checksum|search]',
-	    auto  : ['module','remove','update','checksum','search']  //or null
+	    usage : 'name [module|remove|update|checksum|search,|info|list]',
+	    auto  : ['module','remove','update','checksum','search','info','list']  //or null
 	}
     },
     install,
@@ -245,6 +346,10 @@ module.exports = {
     remove,
     update,
     search,
+    info,
+    list_list,
+    list,
     checksum,
+    calc_checksum,
     autoload : false
 }

@@ -1,10 +1,9 @@
 'use strict'
 
-const vars = ['proto','publicip','port','lngTimeout','verbose','modules','login','app','express','io','url'];
+const vars = ['proto','publicip','port','lngTimeout','verbose','modules','login','app','io','url'];
 
 
 module.exports = function(options){
-    //const j = require('./').options;
     if( options === undefined){ return;}
     
     for( let i in vars){
@@ -12,15 +11,13 @@ module.exports = function(options){
 	this.options[name] = options[name] || this.options[name];
     }
     
-    if( this.options.express == ''){
+    if( this.options.app == ''){
 	try{
-	    this.options.express = require('express');
+	    let express = require('express');
+	    this.options.app = express();
 	}catch(e){
-	    throw new Error('Web-terminal need minimum lib express, use npm install express');
+	    throw new Error('Web-terminal need minimum app = express(), use npm install express');
 	}
-    }
-    if( this.options.app == ''){	
-	this.options.app = this.options.express();
     }
     if( this.options.io == ''){
 	try{

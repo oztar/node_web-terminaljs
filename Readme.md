@@ -1,10 +1,14 @@
-## web-terminaljs  Version 0.2.4
+## web-terminaljs  Version 0.3.5
 It is a system for web terminal, control your nodes using jquery terminal
 create modules for your code:
-    - restart only code of each module - not nodejs
+    - restart only code of each module - not all nodejs
     - control memory
     - create your custom modules
     - delete modules
+
+you can control into nodejs in process with a terminaljs. you cant create custom modules for best control or especific cotrol.
+Not need restart programa, you can reload module and memory ist ok. 
+
 
 ## autor notes
 This version is the base code, it is totally improvable.
@@ -106,6 +110,7 @@ Sorry if my code is not correct.
 	 * reload : Unload and load module in path
 	 * show   : List all modules in memory and commands - description
 	 * list   : List all modules Load and Unload in path
+	 * info   : Description general pkg.
 
 ## save
 
@@ -129,7 +134,7 @@ you need crear a event listen ee.on(save:config)
 ## module custom
 you can create new modules, you will can use wtm_default template to create custom
 
-- you cant install:
+- you can install:
 
  customNameModule.js in **options.path** default **/modules** folder
  /modules/customNameModule.js
@@ -160,3 +165,11 @@ you can create new modules, you will can use wtm_default template to create cust
 		}
 
   !Important: load and unload functions its mandatory with autoload = true
+
+
+## install module
+How to install new modules width using repository
+
+     1 - Update repo   exec in wt> install update
+     2 - Search module (for example m "memory external control") wt> install search m
+     3 - Install new module "memory external control"  wt> install module m

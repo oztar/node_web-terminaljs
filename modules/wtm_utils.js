@@ -72,7 +72,8 @@ const module_load = function(socketID,args){
 	}
 
 	if( fs.existsSync(this.options.path+args[2]+'.js') ){
-	    this._load_module(socketID,args[2]);
+    
+	    this._load_module(socketID,args[2] ,undefined,true);
 	    return;
 
 	}else{
