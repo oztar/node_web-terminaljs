@@ -1,4 +1,4 @@
-## web-terminaljs  Version 0.3.5
+## web-terminaljs  Version 0.3.6
 It is a system for web terminal, control your nodes using jquery terminal
 create modules for your code:
     - restart only code of each module - not all nodejs
@@ -170,6 +170,14 @@ you can create new modules, you will can use wtm_default template to create cust
 ## install module
 How to install new modules width using repository
 
-     1 - Update repo   exec in wt> install update
-     2 - Search module (for example m "memory external control") wt> install search m
-     3 - Install new module "memory external control"  wt> install module m
+### Example install module memo 
+
+    install update
+    install module memo
+
+### Example search module fs
+    
+    install update
+    install search
+    install info fs
+    install module fs

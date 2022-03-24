@@ -1,6 +1,6 @@
 {
   "name": "web-terminaljs",
-  "version": "0.2.4c",
+  "version": "0.3.6",
   "description": "Web terminal, control actions and modules",
   "main": "index.js",
   "scripts": {

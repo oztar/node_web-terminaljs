@@ -2,13 +2,15 @@
 /*
   Author Alfredo Roman
   Description Core Module Install
-  Version 0.2
+  Version 0.4
 */
 
 const u     = require('util').format
 const https = require('https');
 const fs    = require('fs');
 const crypto= require('crypto');
+const zlib  = require('zlib');
+const url   = require('url');
 
 const repoMaxTime = 300000;//300 seconds
 let repoTime = 0;
@@ -16,6 +18,7 @@ let repoTime = 0;
 const md5checksum = async function(str){    
    return await crypto.createHash('md5').update(str).digest("hex");   
 }
+
 
 async function get_page(dirurl) {
     let data = '';
@@ -26,11 +29,91 @@ async function get_page(dirurl) {
 		resolve(data);
             })
         }) 
-	a.setTimeout( 10000, function( ) {
+	a.setTimeout( 5000, function( ) {
 	     resolve('timeout');
 	});
     })
 }
+const unzip_and_load = function(socketID,filegz,spliter){
+    let data = fs.readFileSync(filegz);
+    this.emit(socketID+'progress',45);
+    data = zlib.unzipSync(data);
+    this.emit(socketID+'progress',65);
+
+    const md5 = md5checksum(data)
+	.then( md5checksum =>{
+	    if( md5checksum == this.repo[spliter[0]][spliter[1]].md5){
+		this.emit(socketID,u('module installing',md5checksum));
+		this.emit(socketID+'progress',75);
+		fs.writeFile(this.options.path+spliter[0]+'.js', data, (err)=>{
+		    if (err) {
+			this.emit(socketID+'progress',-1);
+			this.emit(socketID+'err','Error record Module\r\nNot installed');
+			return
+		    }
+		    this.emit(socketID+'progress',98);
+		    
+		    //auto load installed
+		    this.emit(socketID,'module waiting to load '+spliter[0]);
+		    this._load_module(socketID,''+spliter[0],undefined,true);
+		    this.emit(socketID+'progress',99);
+		    this.emit(socketID,'module cleaning '+spliter[0]);
+		    fs.unlink(filegz, (e) => {	
+			if (e) {
+			    this.emit(socketID+'progress',-1);
+			    this.emit(socketID+'err',u(errors['UNDEFINED'],'Remove module',args[2],e));
+			    return
+			}
+			this.emit(socketID+'progress',100);			
+		    }
+		});
+	    }else{
+		this.emit(socketID+'progress',-1);
+		this.emit(socketID+'err','Error in checksum this module\r\nNot installer for security');
+	    }
+	});
+}
+
+const get_file = async function(socketID,dirurl,file,spliter) {
+    let lwrite = 0;
+    let fwrite;
+    let maxbytes = 0; 
+    this.emit(socketID+'progress',1);
+    const a = https.get(dirurl, response=> {
+	if (response.statusCode > 300 && response.headers.location) {	 
+	    if (url.parse(response.headers.location).hostname) {
+		this.wtm_install_get_file(socketID,response.headers.location,file,spliter);
+		return;
+		//https.get(response.headers.location),writeToFile);
+	    } else {
+		this.wtm_install_get_file(socketID,url.resolve(url.parse(TAR_URL).hostname, response.headers.location),file,spliter);
+		return;
+		//https.get(url.resolve(url.parse(TAR_URL).hostname, response.headers.location),writeToFile);
+	    }
+	}
+	maxbytes = response.headers['content-length'];
+	response.on('data', chunk => { 
+	    if( fwrite === undefined){
+		fwrite = fs.createWriteStream(file);
+	    }
+	    fwrite.write(chunk);
+	    lwrite = parseInt(lwrite+chunk.length);
+	    this.emit(socketID+'progress',parseInt(parseInt(lwrite/maxbytes)*25));
+	}) 
+        response.on('end', ()=> { 
+	    fwrite.end(  ()=>{
+		this.emit(socketID+'progress',26);
+		this.wtm_install_unzip_and_load(socketID,file,spliter);
+	    });   
+	});
+    }) 
+    a.setTimeout( 5000, ()=> { 
+	this.emit(socketID+'progress',-1);
+	this.emit(socketID+'err','Error in timeout this module\r\nNot installer, repositorie not respond');
+    });
+}
+
+
 
 
 const errors = {
@@ -61,13 +144,17 @@ const update = async function(socketID,args){
 	this.emit(socketID,'Not Updating\r\ntime between update too short');
 	return true;
     }
-    repoTime = Date.now();
     this.emit(socketID,'Repositorie Updating');
     return await get_page('https://raw.githubusercontent.com/oztar/wtm/main/list.json')
 	.then( result=>{
 	    try{
+		if( result == 'timeout'){
+		    this.emit(socketID,'Repositorie  timeout'); 
+		    return;
+		}
 		this.repo = JSON.parse(result);
 		this.emit(socketID,'Repositorie Updated');
+		repoTime = Date.now();
 	    }catch(e){
 		this.emit(socketID+'err',u(errors['UNDEFINED'],'Result HTTPS JSON',e,result));
 	    }
@@ -97,11 +184,16 @@ const modules = async function(socketID,args){
 
 	if( spliter[1] === undefined){spliter[1] = this.repo[spliter[0] ].lasted}
 
+	if( this.repo[ spliter[0] ][spliter[1]] === undefined){
+	    this.emit(socketID+'err',u(errors['NOT_EXIST'],args[2])); 
+	    return;
+	}
+
 	const version = process.env.npm_package_dependencies_web_terminaljs.substring(1);
 	const pversion = parseInt( version.replace(/\./g,''));
 	if( this.repo[spliter[0]][spliter[1]].compatible === undefined){this.repo[spliter[0]][spliter[1]].compatible = '0'};
 	const cversion = parseInt( this.repo[spliter[0]][spliter[1]].compatible.replace(/\./g,''));
-	if( pversion > cversion ){
+	if( pversion >= cversion ){
 	    this.emit(socketID,'\r\nCompatible:\t\t'+this.f.color('accepted','green'));
 	}else{
 	    this.emit(socketID,'\r\nCompatible:\t\t'+this.f.color('not compatible','red'));
@@ -110,42 +202,15 @@ const modules = async function(socketID,args){
 	}
 
 	
-	const realmodule = this.repo[spliter[0]][spliter[1]].file;
+	let realmodule = this.repo[spliter[0]][spliter[1]].file;
 	this.emit(socketID,'module download '+spliter[0]+' version '+spliter[1]);
 	this.emit(socketID+'progress',0);
-	get_page('https://raw.githubusercontent.com/oztar/wtm/main/wtm_'+realmodule)
-	    .then( result=>{
-		try{
-		    const md5 = md5checksum(result)
-			.then( md5checksum =>{
-			    if( md5checksum == this.repo[spliter[0]][spliter[1]].md5){
-				this.emit(socketID,'module installing');
-				this.emit(socketID+'progress',50);
-				const data = new Uint8Array(Buffer.from(result));
-				fs.writeFile(this.options.path+spliter[0]+'.js', data, (err)=>{
-				    if (err) {
-					this.emit(socketID+'progress',-1);
-					this.emit(socketID+'err','Error record Module\r\nNot installed');
-					return
-				    }
-				    this.emit(socketID+'progress',75);
-				  
-				    //auto load installed
-				    this.emit(socketID,'module waiting to load '+spliter[0]);
-				    this._load_module(socketID,''+spliter[0],undefined,true);
-				    this.emit(socketID+'progress',100);
-				});
-			    }else{
-				this.emit(socketID+'progress',-1);
-				this.emit(socketID+'err','Error in checksum this module\r\nNot installer for security');
-			    }
-			});
-		}catch(e){
-		    this.emit(socketID+'progress',-1);
-		    this.emit(socketID+'err',u(errors['UNDEFINED'],'Result HTTPS JSON',e,result));
-		}
-	    });  
-	
+
+
+	const TAR_URL = 'https://github.com/oztar/wtm/raw/main/' +  realmodule+ '.gz';
+
+
+	this.wtm_install_get_file(socketID,TAR_URL,this.options.path+spliter[0]+'.js.gz',spliter);
     }catch(e){
 		this.emit(socketID+'err',u(errors['UNDEFINED'],'Install',e,''));
     }
@@ -186,8 +251,7 @@ const remove  = function(socketID,args){
     
     try{
 	this.emit(socketID+'progress',10);	
-	fs.unlink(this.installed[args[2]].path
-		  +args[2]+'.js', (e) => {
+	fs.unlink(this.installed[args[2]].path+args[2]+'.js', (e) => {
 	    if (e) {
 		this.emit(socketID+'progress',-1);
 		this.emit(socketID+'err',u(errors['UNDEFINED'],'Remove module',args[2],e));
@@ -217,7 +281,7 @@ const checksum  = async function(socketID,args){
 	return;
     }
 
-    const {err,md5} = await this.wtm_install_calc_checksum(args[2])
+    const [err,md5] = await this.wtm_install_calc_checksum(args[2])
     if(err){
 	this.emit(socketID+'err',u(err));
     }else{
@@ -299,13 +363,20 @@ const info = async function(socketID,args){
 	}
 
 	const spliter = args[2].split('@');//separated for version module@version
-	if( spliter[1] === undefined){spliter[1] = this.repo[spliter[0] ].lasted}
-	
-	if( this.repo[ args[2]] === undefined){
+
+	if( this.repo[ spliter[0] ] === undefined){
 	    this.emit(socketID+'err',u(errors['NOT_EXIST'],args[2])); 
 	    return;
 	}
 
+	if( spliter[1] === undefined){spliter[1] = this.repo[spliter[0] ].lasted}
+
+	if( this.repo[ spliter[0] ][spliter[1]] === undefined){
+	    this.emit(socketID+'err',u(errors['NOT_EXIST'],args[2])); 
+	    return;
+	}
+	
+	const infoAuthor = this.repo[spliter[0]];
 	const infoModule = this.repo[spliter[0]][spliter[1]];
 	const version = process.env.npm_package_dependencies_web_terminaljs.substring(1);
 	const pversion = parseInt( version.replace(/\./g,''));
@@ -313,12 +384,12 @@ const info = async function(socketID,args){
 	const cversion = parseInt( infoModule.compatible.replace(/\./g,''));
 	
 	res = '\r\nInfo module: '+spliter[0]+'\r\n';
-	res += '\r\nAuthor:\t\t\t'+infoModule.author;
-	res += '\r\nVersion:\t\t'+infoModule.version;
-	res += '\r\nLicense:\t\t'+infoModule.license;
+	res += '\r\nAuthor:\t\t\t'+infoAuthor.author;
+	res += '\r\nVersion:\t\t'+spliter[1];
+	res += '\r\nLicense:\t\t'+infoAuthor.license;
 	res += '\r\nMd5:\t\t\t'+infoModule.md5;	    
 
-	if( pversion > cversion ){
+	if( pversion >= cversion ){
 	    res += '\r\nCompatible:\t\t'+this.f.color('accepted','green');
 	}else{
 	    res += '\r\nCompatible:\t\t'+this.f.color('not compatible','red');
@@ -351,5 +422,7 @@ module.exports = {
     list,
     checksum,
     calc_checksum,
+    get_file,
+    unzip_and_load,
     autoload : false
 }
