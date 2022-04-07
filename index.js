@@ -2,7 +2,7 @@
 /**
  * @file Web-Terminaljs
  * @author Alfredo Roman <alfredoromandominguez@gmail.com>
- * @version 0.1.3
+ * @version 0.3.7
 */
 
 

@@ -1,3 +1,6 @@
+## Version 0.3.7 07-04-2022
+	Fixed - npm >7
+	Fixed - Module install
 ## Version 0.3.6 24-03-2022
 	Fixed - install module - check version
 	Fixed - install module - download github problem checksum module

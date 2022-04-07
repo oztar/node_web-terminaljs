@@ -65,7 +65,7 @@ const unzip_and_load = function(socketID,filegz,spliter){
 			    return
 			}
 			this.emit(socketID+'progress',100);			
-		    }
+		    });
 		});
 	    }else{
 		this.emit(socketID+'progress',-1);
