@@ -41,7 +41,7 @@ module.exports = {
 	}
 	
 	if( color !== undefined){
-	    txt = j.core.color(txt,color);
+	    txt = '[[;'+color+';]'+JSON.stringify(txt)+']';
 	}
 	while( spaces > 0){
 	    txt +="\t";

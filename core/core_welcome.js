@@ -16,9 +16,9 @@ welcome +='       #    #####   ######  #  #  #  #  #  #  # #     # #      '+"\r\
 welcome +='       #    #       #   #   #     #  #  #   # # ####### #      '+"\r\n";
 welcome +='       #    #       #    #  #     #  #  #    ## #     # #      '+"\r\n";
 welcome +='       #    ####### #     # #     # ### #     # #     # #######'+"\r\n";
-welcome +='jquery version v3.41.1. \n';
-welcome +='jquery terminal version v2.29.2 \n';
-welcome +='Web Terminal Js CLI version v0.3.7';
+welcome +='jquery version v3.41.1.\n';
+welcome +='jquery terminal version v2.34.0\n';
+welcome +='Web Terminal Js CLI version v0.3.8';
 
 module.exports = function(socketid){
     //msg welcome

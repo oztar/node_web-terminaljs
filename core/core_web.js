@@ -35,6 +35,7 @@ let terminal_command_timeout = 0;\
 let terminal_command_date = 0;\
 let terminal_time_timeout = 10; \
 let terminal_autocomplete = {};\
+let terminal;\
 function buf2Base64(buffer) {\
     return btoa(String.fromCharCode.apply(null, new Uint8Array(buffer)));\
 }\
@@ -77,7 +78,7 @@ jQuery(function($, undefined) {\
 	    this.error(new String('empty command using help'));\
         }\
     };\
-    let terminal = $('#terminal').terminal(comand, {\
+    terminal = $('#terminal').terminal(comand, {\
 	autocompleteMenu: true,	\
 	completion: completions,\
         greetings: '',\
@@ -197,6 +198,11 @@ function getTimeLeft() {   \
 }\
 function terminalUnblockTimeout(){\
     if( terminal_command_timeout != 0){\
+        if ( getTimeLeft(terminal_command_timeout) <= 0){ \
+          terminal.error(new String('Command: Error TimeOut'));\
+          terminalUnblockInTime();\
+          return 1;\
+        }\
 	return 0;\
     }else{\
 	terminal_command_date = Date.now();\
@@ -226,7 +232,7 @@ function terminalUnblockInTime(){\
 <!-- <script src=\"./js/socket.io.js\"></script>-->\
  <script src=\"https://cdn.socket.io/4.3.2/socket.io.min.js\"></script>\
  <script src=\"https://code.jquery.com/jquery-3.4.1.min.js\"></script> \
- <script src=\"https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.29.2/js/jquery.terminal.min.js\"></script>\
+ <script src=\"https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.34.0/js/jquery.terminal.min.js\"></script>\
  <script src=\""+options.url+"basic.js\"></script>\
  <script>\
    const IOproto = \""+options.proto+"\";\
