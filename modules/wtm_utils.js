@@ -41,26 +41,33 @@ const help = function(socketID,args){
 
 
 const module_show = function(socketID,args){
-    let msg = 'Name\t\tLoaded\tCommand\t\tDescription\r\n';
+    let title = 'List of Modules in WTM installed';
+    let head = { 'c1' :'Name' , 'c2' : 'Loaded' , 'c3' : 'Command' ,'c4': 'Description'};
+    let table = [];
     let pasa;
+    
+    let load = '';
     for( let name in this.module){
 	pasa = 0;
-	msg += this.f.col(name,0);
 	if( this.list_modules[name]){
-	    msg += this.f.col(this.f.color('Load','green'),0);
-	     for( let con in this.module[name].command){
-		 if( pasa == 1){msg +='\t\t\t\t\t';}
-		 msg += this.f.col(con,0);
-		 msg += this.f.col(this.f.col(this.module[name].command[con].description,0),0);
-		 msg += '\r\n';
-		 pasa = 1;
-	     }
+	    load = this.f.color('Load','green');
+	    for( let con in this.module[name].command){		
+		if( pasa == 1){ 
+		    table.push({ 'c1' : ' ' , 'c2' : ' ', 'c3': con ,'c4': this.module[name].command[con].description,});
+		}else{
+		    table.push({ 'c1' : name , 'c2' : load , 'c3' : con ,'c4':this.module[name].command[con].description,});
+		}
+		pasa = 1;
+	    }
 	}else{
-	    msg += this.f.color('UnLoad','red');
+	    load = this.f.color('UnLoad','red');
+	    table.push({ 'c1' : name , 'c2' : load , 'c3' : ' ' ,'c4':' '});
 	}
-    	msg += '\r\n';
-    }
-   this.emit(socketID,msg); 
+	
+    }   
+    this.emit('tablef',socketID,{ title,
+				  head,
+				  table}); 
 }
 
 
@@ -74,6 +81,7 @@ const module_load = function(socketID,args){
 	if( fs.existsSync(this.options.path+args[2]+'.js') ){
     
 	    this._load_module(socketID,args[2] ,undefined,true);
+	    this.options.modules[args[2]] = true;
 	    return;
 
 	}else{
@@ -97,6 +105,7 @@ const module_unload = function(socketID,args){
 	if( this.list_modules[args[2]] !== undefined){
 	    if(  this.list_modules[args[2]]){ 
 		this._unload_module(socketID,args[2]);
+		this.options.modules[args[2]] = false;
 		return;
 	    }
 	}
@@ -113,22 +122,29 @@ const module_list = function(socketID,args){
 	return;
     }
     
+    let title = 'List all modules in path folder: '+this.options.path;
+    let head  = { 'c1' : 'Name' , 'c2' : 'Loaded'};
+    let table = [];
+    let load;
+    
     fs.readdir(this.options.path, (err, files) => {
-	let msg = 'Module\t\tName\t\tLoaded\r\n';
+	
 	files.forEach(name => {
 	    name = name.replace('.js','');
 	    if( name != 'default'){
-		msg += 'Module\t';
-		msg += name+'\t';
 		if( this.list_modules[name]){
-		    msg += this.f.color('Load','green');
+		    load = this.f.color('Load','green');
 		}else{
-		    msg += this.f.color('unLoad','red');
+		    load = this.f.color('unLoad','red');
 		}
-		msg += '\r\n';
+		table.push({'c1': name ,'c2': load});
 	    }	
 	});
-	this.emit(socketID,msg);
+	
+	this.emit('tablef',socketID,{ title,
+				      'tableid' : true,
+				      head,
+				      table}); 
     });
 }
 
@@ -152,8 +168,8 @@ const modules = function(socketID,args){
 }
 
 const save = function(socketID,args){
-    this.emit('save:config',this.options.modules);
-    this.emit(socketID,'Save Config sended');
+    this.emit('save:config',socketID,this.options.modules);
+    this.emit(socketID,'Save Config sended event "save:config"');
 }
 
 module.exports = {

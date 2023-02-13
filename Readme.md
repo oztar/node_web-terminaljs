@@ -1,10 +1,12 @@
-## web-terminaljs  Version 0.3.7
+## web-terminaljs  Version 0.4.1
 It is a system for web terminal, control your nodes using jquery terminal
 create modules for your code:
     - restart only code of each module - not all nodejs
     - control memory
     - create your custom modules
     - delete modules
+    - Repository Web TerminalJS - "comand> module install {name}"
+    
 
 you can control into nodejs in process with a terminaljs. you cant create custom modules for best control or especific cotrol.
 Not need restart programa, you can reload module and memory ist ok. 

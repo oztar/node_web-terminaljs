@@ -8,6 +8,7 @@ const coreModules = {
     wtm_verbose: true,
     wtm_login  : true,
     wtm_echo   : true,
+    wtm_table  : true,
     wtm_install: true
 }
 const corePath = __dirname+'/../modules/';//modules Core
@@ -20,9 +21,17 @@ module.exports ={
 
 
 		     
-	//load module	
-	this.module[name]  = require(path+name); 
-	this.list_modules[name] = true;
+	//load module
+	try{
+	    this.module[name]  = require(path+name); 
+	    this.list_modules[name] = true;
+	}catch(err){
+	    this.emit('LOGe','Error: load module ');
+	    this.emit('LOGe',err.message);
+	    this.emit('LOGe',err.stack);
+	    delete this.list_modules[name];
+	    return;
+	}
 
 	if( installed){	    
 	    //save pkg installed
@@ -62,7 +71,21 @@ module.exports ={
 		
 	//auto start 
 	if( this.module[name].autoload){
-	    this[name+'_load'](socketID);
+	    try{
+		this[name+'_load'](socketID);
+	    }catch(err){
+		this.emit('LOGe','Error: load not found function ');
+		for( let moduleName in this.module[name].command){
+		    delete this['module_'+moduleName];
+		    delete this.options.list_command[moduleName];
+		    delete this.options.list_usage_command[moduleName];
+		    delete this.options.list_auto_command[moduleName];
+		}
+		this.emit('LOGe',err.message);
+		this.emit('LOGe',err.stack);
+		delete require.cache[require.resolve(path+name)];
+		return;
+	    }
 	}
 	
 	if( socketID !== null){
@@ -77,7 +100,12 @@ module.exports ={
 	
 	//auto unload
 	if( this.module[name].autoload){
-	    this[name+'_unload'](socketID);
+	    try{
+		this[name+'_unload'](socketID);
+	    }catch(err){
+		this.emit('LOGe','Error: unload not found function, this module generate in program inestability.')
+		this.emit('LOGe','You need restart all program whit out this module. ');
+	    }
 	}
 	
 	//unset all functions
@@ -99,7 +127,7 @@ module.exports ={
 	delete require.cache[require.resolve(path+name)];
 	delete this.module[name];
 	this.list_modules[name] = false;
-	
+
 	if( socketID !== null){
 	    this.emit(socketID,'unload '+name);
 	}
