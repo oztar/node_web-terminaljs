@@ -33,7 +33,8 @@ const IOserver  = http.createServer(app);
 */
 const io = libIO(IOserver);
 
-const options = { 
+const options = {
+    enable: true,
     port : 80,
     modules : {
 	"wtm_default" : true,

@@ -9,7 +9,7 @@ const nonce = function(length) {
 }
 
 module.exports = function(){
-    const tio = this.options.io.of('/'+this.options.io_name_space);
+    const tio = this.options.io.of('/'+this.options.io_name_space);   
     tio.on('connection', socket =>{
 	socket.join('Loge');//Log Error
 	
@@ -28,6 +28,7 @@ module.exports = function(){
 	
 	const emit_terminal = (con)=>{
 	    try{
+
 		if( this.user[socket.id].loged == 1 ){
 		    let d = con.split(' ');	
 		    if(this.options.list_command[d[0]] === undefined){
@@ -122,6 +123,6 @@ module.exports = function(){
 	socket.on('loginPass',_pass);//start socket
 
 	this.client_socket[socket.id] = socket;
-    });
+    }); 
     this.options.io = tio;
 }

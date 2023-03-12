@@ -38,7 +38,8 @@ Sorry if my code is not correct.
     const io = libIO(IOserver);
 
     
-    const options = 
+    const options =
+     webEnable : true,
      port : 80,
      express,
      app,
@@ -73,23 +74,35 @@ Sorry if my code is not correct.
     }
     ...
 
+##example standalone
+
+    ...
+        const options = 
+     port : 8080,
+     login: true,
+     modules : {
+     	     "wtm_loginCrypto" : false
+     }
+    }
+    ...
 
 ## options 
 
     //options
-    express  :  Library express or compatible
-    http     :  Library HTTP or compatible
-    io       :  Library Socket.io
+    webEneable :  Enable Express,http web.                     Default Enable
+    express    :  Library express or compatible
+    http       :  Library HTTP or compatible
+    io         :  Library Socket.io 
 
-    login    : [true|false]
-    proto    : [http|https]
-    publicip : [localhost|127.0.0.1|yourdomain.com...]
-    port     : [80|443|8080...]
-    path     : path by your custom modules or addons wtm
-    url      : path your uri terminal
-    verbose  : Level inital console
-    modules  : json { name_custonmodule : true, name_othercuston : false,... }
-    users    : For Login true, list Json USERs permit using terminal 
+    login      : [true|false]
+    proto      : [http|https]
+    publicip   : [localhost|127.0.0.1|yourdomain.com...]
+    port       : [80|443|8080...]
+    path       : path by your custom modules or addons wtm
+    url        : path your uri terminal
+    verbose    : Level inital console
+    modules    : json { name_custonmodule : true, name_othercuston : false,... }
+    users      : For Login true, list Json USERs permit using terminal 
 
 ## Core comands 
 

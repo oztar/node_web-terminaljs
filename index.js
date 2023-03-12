@@ -2,7 +2,7 @@
 /**
  * @file Web-Terminaljs
  * @author Alfredo Roman <alfredoromandominguez@gmail.com>
- * @version 0.3.8
+ * @version 0.5.0
 */
 
 
@@ -21,6 +21,7 @@ class terminal extends EventEmitter{
     repo = {};//list modules repositorie
     installed = {};//list modules installed in custom path
     options = {
+	webEngine     : true,
 	proto         : 'http',
 	publicip      : '127.0.0.1',
 	port          : 80,
@@ -62,7 +63,9 @@ class terminal extends EventEmitter{
 	super();
 	this._opc(options);
 	this._start_modules();
-	this._start_web();
+	if( this.options.webEngine){
+	    this._start_web();
+	}
 	this._io();
 
     }
