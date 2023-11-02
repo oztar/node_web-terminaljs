@@ -1,32 +1,61 @@
 {
-  "name": "web-terminaljs",
-  "version": "0.5.0",
-  "description": "Web terminal, control actions and modules",
-  "main": "index.js",
-  "scripts": {
-    "strt": "node index.js"
+  "_from": "web-terminaljs",
+  "_id": "web-terminaljs@0.6.0",
+  "_inBundle": false,
+  "_integrity": "sha512-9dxJvlOccQYZH9EIzWiJgdwP27X3Rb+MXjCMGbcRHfsGxCYhfHtinwzj+lxYcfPC4Cn2oc5mfnMJFGweqdqKPw==",
+  "_location": "/web-terminaljs",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "web-terminaljs",
+    "name": "web-terminaljs",
+    "escapedName": "web-terminaljs",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
   },
-  "author": "Alfredo Roman Dominguez",
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/web-terminaljs/-/web-terminaljs-0.5.0.tgz",
+  "_shasum": "e1ee8b4bbffa2ea2672895266ccc4258ed44f15c",
+  "_spec": "web-terminaljs",
+  "_where": "Z:\\proyectos\\wtm_nuevos_modulos",
+  "author": {
+    "name": "Alfredo Roman Dominguez"
+  },
+  "bugs": {
+    "url": "https://github.com/oztar/node_web-terminaljs/issues"
+  },
+  "bundleDependencies": [],
+  "dependencies": {    
+    "targz": "^1.0.1"
+  },
+  "deprecated": false,
+  "description": "Web terminal, control actions and modules",
+  "homepage": "https://github.com/oztar/node_web-terminaljs#Readme",
+  "keywords": [
+    "terminal",
+    "terminaljs",
+    "jquery terminal",
+    "jquery-terminal",
+    "web-terminal",
+    "web-terminaljs",
+    "modules",
+    "reload-modules",
+    "reload modules"
+  ],
   "license": "ISC",
+  "main": "index.js",
+  "name": "web-terminaljs",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/oztar/node_web-terminaljs.git"
   },
-  "keywords": [
-      "terminal",
-      "terminaljs",
-      "jquery terminal",
-      "jquery-terminal",
-      "web-terminal",
-      "web-terminaljs",
-      "modules",
-      "reload-modules",
-      "reload modules"
-  ],
-  "bugs": {
-    "url": "https://github.com/oztar/node_web-terminaljs/issues"
+  "scripts": {
+    "strt": "node index.js"
   },
-  "homepage": "https://github.com/oztar/node_web-terminaljs#Readme",
-  "dependencies": {},
-  "devDependencies": {}
+    "version": "0.6.0"
 }

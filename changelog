@@ -1,3 +1,7 @@
+## Version 0.6.0 01-11-2023
+	add  - install module - custom repo with options [repoURL, repoJson]
+	add  - install module - targz
+	add  - install module - Packages multifiles
 ## Version 0.4.1 13-02-2023
 	Fixed Core Load modules - dont crash for modules dont load for errors
 	Add	- internal module table, for created tables formated good in console.
