@@ -1,4 +1,4 @@
-## web-terminaljs  Version 0.4.1
+## web-terminaljs  Version 0.6.1
 It is a system for web terminal, control your nodes using jquery terminal
 create modules for your code:
     - restart only code of each module - not all nodejs
