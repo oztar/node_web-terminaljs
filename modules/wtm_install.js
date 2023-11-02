@@ -2,7 +2,7 @@
 /*
   Author Alfredo Roman
   Description Core Module Install
-  Version 0.5
+  Version 0.5.1
 */
 
 const u     = require('util').format
@@ -35,14 +35,26 @@ async function get_page(dirurl) {
 	});
     })
 }
-const unzip_and_write = function(socketID,filegz,spliter,targz){
-	if( targz ){
-		this.wtm_install_write_tar(socketID,filegz,spliter);
-		return;
+const unzip_and_write = function(socketID,filegz,spliter,tar){
+	let data = fs.readFileSync(filegz);
+    this.emit(socketID+'progress',45);
+    
+	if( tar ){
+		const md5 = md5checksum(data)
+		.then( md5checksum =>{
+			if( md5checksum == this.repo[spliter[0]][spliter[1]].md5){
+				this.emit(socketID,u('module installing',md5checksum));
+				this.emit(socketID+'progress',75);
+	
+				this.wtm_install_write_tar(socketID,filegz,spliter);
+				return;
+			}else{
+				this.emit(socketID+'progress',-1);
+				this.emit(socketID+'err','Error in checksum this module\r\nNot installer for security');
+			}
+		});	
 	}
 
-    let data = fs.readFileSync(filegz);
-    this.emit(socketID+'progress',45);
     data = zlib.unzipSync(data);
     this.emit(socketID+'progress',65);
 
@@ -108,11 +120,8 @@ const write_tar =  function(socketID,filegz,spliter){
 		this.emit(socketID,u('Error install module',e));		
 	}
 }
-const prueba = function(socketID,args){
-	this.emit(socketID,args[2]);
-	this.wtm_install_write_tar(socketID,args[2],[]);
-}
-const get_file = async function(socketID,dirurl,file,spliter,targz) {
+
+const get_file = async function(socketID,dirurl,file,spliter,tar = false) {
     let lwrite = 0;
     let fwrite;
     let maxbytes = 0; 
@@ -141,7 +150,7 @@ const get_file = async function(socketID,dirurl,file,spliter,targz) {
         response.on('end', ()=> { 
 	    fwrite.end(  ()=>{
 		this.emit(socketID+'progress',26);
-		this.wtm_install_unzip_and_write(socketID,file,spliter,targz);
+		this.wtm_install_unzip_and_write(socketID,file,spliter,tar);
 	    });   
 	});
     }) 
@@ -241,18 +250,18 @@ const modules = async function(socketID,args){
 	
 	let TAR_URL = this.options.repoURL + this.repo[spliter[0]][spliter[1]].file  + '.gz';
 	let tar =	this.options.path+spliter[0]+'.js.gz'
-	let targz = false;//old versions 0.4.0
+	let tartf = false;//old versions 0.4.0   TAR True False
 	if( this.repo[ spliter[0] ][spliter[1] ].tar !== undefined ){		
 		TAR_URL = this.options.repoURL +  this.repo[ spliter[0] ][spliter[1] ].tar;	
 		tar  =  this.repo[ spliter[0] ][spliter[1] ].tar;
-		targz = true;
+		tartf = true;
 	}
 	
 	this.emit(socketID,'module download '+spliter[0]+' version '+spliter[1]);
 	this.emit(socketID+'progress',0);
 
 
-	this.wtm_install_get_file(socketID,TAR_URL,tar,spliter,targz);
+	this.wtm_install_get_file(socketID,TAR_URL,tar,spliter,tartf);
     }catch(e){
 		this.emit(socketID+'err',u(errors['UNDEFINED'],'Install',e,''));
     }
@@ -469,7 +478,6 @@ module.exports = {
     unzip_and_write,
 	write_file,
 	write_tar,
-	prueba,
 	post_install,
     autoload : false
 }
