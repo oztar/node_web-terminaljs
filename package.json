@@ -1,6 +1,6 @@
 {
   "_from": "web-terminaljs",
-  "_id": "web-terminaljs@0.6.0",
+  "_id": "web-terminaljs@0.6.1",
   "_inBundle": false,
   "_integrity": "sha512-9dxJvlOccQYZH9EIzWiJgdwP27X3Rb+MXjCMGbcRHfsGxCYhfHtinwzj+lxYcfPC4Cn2oc5mfnMJFGweqdqKPw==",
   "_location": "/web-terminaljs",
@@ -56,6 +56,5 @@
   },
   "scripts": {
     "strt": "node index.js"
-  },
-    "version": "0.6.0"
+  }
 }

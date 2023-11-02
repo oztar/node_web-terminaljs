@@ -36,27 +36,31 @@ async function get_page(dirurl) {
     })
 }
 const unzip_and_write = function(socketID,filegz,spliter,tar){
-	let data = fs.readFileSync(filegz);
+    this.emit(socketID+'progress',27);
+    let data = fs.readFileSync(filegz);
     this.emit(socketID+'progress',45);
-    
-	if( tar ){
-		const md5 = md5checksum(data)
-		.then( md5checksum =>{
-			if( md5checksum == this.repo[spliter[0]][spliter[1]].md5){
-				this.emit(socketID,u('module installing',md5checksum));
-				this.emit(socketID+'progress',75);
-	
-				this.wtm_install_write_tar(socketID,filegz,spliter);
-				return;
-			}else{
-				this.emit(socketID+'progress',-1);
-				this.emit(socketID+'err','Error in checksum this module\r\nNot installer for security');
-			}
-		});	
-	}
-
     data = zlib.unzipSync(data);
     this.emit(socketID+'progress',65);
+    
+    if( tar ){
+	const md5 = md5checksum(data)
+	      .then( md5checksum =>{
+		  if( md5checksum == this.repo[spliter[0]][spliter[1]].md5){
+		      this.emit(socketID,u('module installing MD5: "%s" %s',md5checksum,this.f.color('accepted','green')));
+		      this.emit(socketID+'progress',75);
+		      
+		      this.wtm_install_write_tar(socketID,filegz,spliter);
+		      return;
+		  }else{
+		      this.emit(socketID+'progress',-1);
+		      this.emit(socketID+'err',u('MD5: %s \r\nMD5: %s \r\n Not iqual.\r\n%s',md5checksum,this.repo[spliter[0]][spliter[1]].md5,'Error in checksum this module\r\nNot installer for security'));
+		      
+		  }
+	      });
+	return;
+    }
+
+   
 
     const md5 = md5checksum(data)
 	.then( md5checksum =>{
@@ -121,19 +125,19 @@ const write_tar =  function(socketID,filegz,spliter){
 	}
 }
 
-const get_file = async function(socketID,dirurl,file,spliter,tar = false) {
+const get_file = async function(socketID,dirurl,file,spliter,tar) {
     let lwrite = 0;
     let fwrite;
     let maxbytes = 0; 
-    this.emit(socketID+'progress',1);
+    this.emit(socketID+'progress',2);
     const a = https.get(dirurl, response=> {
 	if (response.statusCode > 300 && response.headers.location) {	 
 	    if (url.parse(response.headers.location).hostname) {
-		this.wtm_install_get_file(socketID,response.headers.location,file,spliter);
+		this.wtm_install_get_file(socketID,response.headers.location,file,spliter,tar);
 		return;
 		//https.get(response.headers.location),writeToFile);
 	    } else {
-		this.wtm_install_get_file(socketID,url.resolve(url.parse(TAR_URL).hostname, response.headers.location),file,spliter);
+		this.wtm_install_get_file(socketID,url.resolve(url.parse(TAR_URL).hostname, response.headers.location),file,spliter,tar);
 		return;
 		//https.get(url.resolve(url.parse(TAR_URL).hostname, response.headers.location),writeToFile);
 	    }
@@ -145,7 +149,7 @@ const get_file = async function(socketID,dirurl,file,spliter,tar = false) {
 	    }
 	    fwrite.write(chunk);
 	    lwrite = parseInt(lwrite+chunk.length);
-	    this.emit(socketID+'progress',parseInt(parseInt(lwrite/maxbytes)*25));
+	    this.emit(socketID+'progress',parseInt(1+(parseInt(lwrite/maxbytes))*25));
 	}) 
         response.on('end', ()=> { 
 	    fwrite.end(  ()=>{
@@ -251,15 +255,15 @@ const modules = async function(socketID,args){
 	let TAR_URL = this.options.repoURL + this.repo[spliter[0]][spliter[1]].file  + '.gz';
 	let tar =	this.options.path+spliter[0]+'.js.gz'
 	let tartf = false;//old versions 0.4.0   TAR True False
-	if( this.repo[ spliter[0] ][spliter[1] ].tar !== undefined ){		
-		TAR_URL = this.options.repoURL +  this.repo[ spliter[0] ][spliter[1] ].tar;	
-		tar  =  this.repo[ spliter[0] ][spliter[1] ].tar;
-		tartf = true;
+	if( this.repo[ spliter[0] ][ spliter[1] ].tar !== undefined ){		
+	    TAR_URL = this.options.repoURL +  this.repo[ spliter[0] ][ spliter[1] ].tar;	
+	    tar  =  this.repo[ spliter[0] ][ spliter[1] ].tar;
+	    tartf = true;
+	    this.emit(socketID,'module newVersion tar gz');
 	}
 	
-	this.emit(socketID,'module download '+spliter[0]+' version '+spliter[1]);
+	this.emit(socketID,'module download '+spliter[0]+' version '+spliter[1]);	
 	this.emit(socketID+'progress',0);
-
 
 	this.wtm_install_get_file(socketID,TAR_URL,tar,spliter,tartf);
     }catch(e){

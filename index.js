@@ -13,7 +13,7 @@ const core = require('./core');
 
 class terminal extends EventEmitter{
     /* default config */
-    version = '0.6.0';
+    version = '0.6.1';
     module = {};//funstions for module
     list_modules = {};//list of modules load
     user = {};//list socket IO connected 
@@ -31,8 +31,8 @@ class terminal extends EventEmitter{
 	io_name_space : 'terminal',
 	lngTimeout    : 'comand not found',
 	verbose       : 0,
-    repoURL       : 'https://github.com/oztar/wtm/raw/main/',
-    repoJson      : 'https://raw.githubusercontent.com/oztar/wtm/main/list.json',
+	repoURL       : 'https://github.com/oztar/wtm/raw/main/',
+	repoJson      : 'https://raw.githubusercontent.com/oztar/wtm/main/list.json',
 	login         : false, 
 	app           : '',//express()
 	io            : '',//sokect.io(http.createServer(app))

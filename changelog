@@ -1,5 +1,8 @@
-## Version 0.6.0 02-11-2023
+## Version 0.6.1 02-11-2023
 	Fixed - install module - md5 check tar.gz packages
+	Fixed - version terminal
+	Fixed - install module - md5 packages
+	Fixed - REPO - list.json
 ## Version 0.6.0 01-11-2023
 	add  - install module - custom repo with options [repoURL, repoJson]
 	add  - install module - targz
